@@ -61,9 +61,13 @@ print(x_train.shape, x_test.shape)
 print(y_train.shape, y_test.shape)
 # (398,) (171,)
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
-scaler = MinMaxScaler()
+# scaler = MinMaxScaler()
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
+
 scaler.fit(x_train)
 
 x_train = scaler.transform(x_train)
@@ -117,6 +121,7 @@ hist = model.fit(x_train, y_train,
 end_time = time.time()
 
 #4. 평가, 예측
+print("================ keras28_cancer ====================")
 loss = model.evaluate(x_test, y_test)
 print("====================================================")
 print('loss : ', loss[0])
@@ -145,9 +150,9 @@ print('acc_score : ', acc_score)
 # rmse = RMSE(y_test, y_predict)
 # print('RMSE : ', rmse)
 
-"""
-print("훈련시간 : ", round(end_time - start_time, 2),"sec")
 
+print("훈련시간 : ", round(end_time - start_time, 2),"sec")
+"""
 print("========================= history ==================================")
 print(hist)
 print("======================= hist.history ===============================")
@@ -157,6 +162,8 @@ print(hist.history['loss'])
 print("=========================== val_loss =================================")
 print(hist.history['val_loss'])
 print("============================ history =================================")
+
+
 
 import matplotlib.pyplot as plt
 
@@ -176,6 +183,50 @@ plt.grid()    #격자 표시를 추가
 plt.show()    #
 """
 
+'''
+standardscaler
+Epoch 24/1000
+9/9 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - acc: 1.0000 - loss: 0.0018 - val_acc: 0.9750 - val_loss: 0.2672
+6/6 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - acc: 0.9766 - loss: 0.0650 
+====================================================
+loss :  0.06504502892494202
+acc :  0.9766
+====================================================
+6/6 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step 
+acc_score :  0.9766081871345029
+훈련시간 :  2.4 sec
 
+--------------------------------------------------------------
+
+MaxAbsSclaer
+
+Epoch 37/1000
+9/9 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - acc: 0.9676 - loss: 0.0811 - val_acc: 0.9833 - val_loss: 0.1733
+6/6 ━━━━━━━━━━━━━━━━━━━━ 0s 862us/step - acc: 0.9532 - loss: 0.1119
+====================================================
+loss :  0.11194473505020142
+acc :  0.9532
+====================================================
+6/6 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step 
+acc_score :  0.9532163742690059
+훈련시간 :  3.44 sec
+
+---------------------------------------------------------
+
+RobustScaler
+
+Epoch 23/1000
+9/9 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - acc: 1.0000 - loss: 0.0018 - val_acc: 0.9667 - val_loss: 0.4181
+================ keras28_cancer ====================
+6/6 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - acc: 0.9708 - loss: 0.1228
+====================================================
+loss :  0.12283558398485184
+acc :  0.9708
+====================================================
+6/6 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step 
+acc_score :  0.9707602339181286
+훈련시간 :  2.4 sec
+
+'''
 
 

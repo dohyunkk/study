@@ -77,10 +77,13 @@ x_train, x_test, y_train, y_test = train_test_split(
     random_state=23,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
-scaler = StandardScaler()
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
+
 scaler.fit(x_train)
 
 x_train = scaler.transform(x_train)
@@ -108,24 +111,24 @@ model.add(Dense(1))
 model.compile(loss='mse', optimizer='adam')
 
 from tensorflow.keras.callbacks import EarlyStopping
-es = EarlyStopping(               # 최소 혹은 최대값을 구해주는 코드 (if문으로 구성되어있는 조건문)
-    monitor = 'val_loss',         # 모니터링 할게
-    mode = 'min',                 # 최소점
-    patience = 15,                # patience = n 번동안 갱신되지 않으면
-    restore_best_weights = True,  # 기본값 = false - 원칙적으론 true가 좋으나, false가 나을때도 있음.
+es = EarlyStopping(               
+    monitor = 'val_loss',         
+    mode = 'min',                 
+    patience = 15,                
+    restore_best_weights = True,  
 )
 
 
-start_time = time.time()     # 현재 시간을 반환. 시작시간
+start_time = time.time()     
 hist = model.fit(x_train, y_train, 
                  epochs=50000,
                  batch_size=32, 
                  validation_split=0.2,
                  callbacks=[es],
                  )
-end_time = time.time()       # 현재 시간을 반환. 종료시간
+end_time = time.time()       
 
-print("=====================================================")
+print("===================== keras28_ddarung ================================")
 
 #4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
@@ -161,15 +164,15 @@ print("RMSE : ", rmse)
 
 print("훈련시간 :", round(end_time - start_time, 2),"sec")
 
-print("============================ history =================================")
-print(hist)
-print("========================= hist.histoy ==============================")
-print(hist.history)
-print("============================= loss =================================")
-print(hist.history['loss'])
-print("=========================== val_loss =================================")
-print(hist.history['val_loss'])
-print("============================ history =================================")
+# print("============================ history =================================")
+# print(hist)
+# print("========================= hist.histoy ==============================")
+# print(hist.history)
+# print("============================= loss =================================")
+# print(hist.history['loss'])
+# print("=========================== val_loss =================================")
+# print(hist.history['val_loss'])
+# print("============================ history =================================")
 
 import matplotlib.pyplot as plt
 
@@ -216,7 +219,9 @@ RMSE :  54.33029753750767
 훈련시간 : 15.23 sec
 
 =================================================
+
 standardscaler
+
 Epoch 51/50000
 25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - loss: 2762.9790 - val_loss: 2835.5569
 11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - loss: 2955.6335 
@@ -226,4 +231,35 @@ r2 = :  0.5266435038070127
 mse :  2955.63341006355
 RMSE :  54.365737464542406
 훈련시간 : 4.27 sec
+
+------------------------------------------------------
+
+MaxAbsScaler
+
+Epoch 150/50000
+25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - loss: 2768.3628 - val_loss: 2853.6833
+=====================================================
+11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - loss: 2964.9202 
+loss :  2964.920166015625
+11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step 
+r2 = :  0.5251561736449666
+mse :  2964.920285292039
+RMSE :  54.45108158055301
+훈련시간 : 12.37 sec
+
+-------------------------------------------------------------
+
+RobustScaler
+
+Epoch 48/50000
+25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - loss: 2759.9395 - val_loss: 2829.0828
+===================== keras28_ddarung ================================
+11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - loss: 2974.4873 
+loss :  2974.4873046875
+11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step 
+r2 = :  0.5236239884785698
+mse :  2974.487234736331
+RMSE :  54.53885985915301
+훈련시간 : 4.48 sec
+
 """

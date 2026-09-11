@@ -14,13 +14,16 @@ import time
 # print(x_train.shape, x_test.shape) # (404, 13) (102, 13)
 # print(y_train.shape, y_test.shape) # (404,) (102,)
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
-scaler = StandardScaler()
-scaler.fit(x_train)
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
 
+scaler.fit(x_train)
 x_train = scaler.transform(x_train)
+
 x_test = scaler.transform(x_test)
 
 print(x_train)
@@ -63,7 +66,7 @@ hist = model.fit(x_train, y_train,
                  callbacks=[es],
                  )
 end_time = time.time()       # 현재 시간을 반환. 종료시간
-print("===================================================")
+print("=====================keras28_boston==============================")
 # 4. 평가, 예측
 loss = model.evaluate(x_test, y_test, )
 print('loss(mse) : ', loss)
@@ -94,15 +97,15 @@ print("RMSE : ", rmse)
 
 print("훈련시간 :", round(end_time - start_time, 2),"sec")
 
-print("============================ history =================================")
-print(hist)
-print("========================= hist.histoy ==============================")
-print(hist.history)
-print("============================= loss =================================")
-print(hist.history['loss'])
-print("=========================== val_loss =================================")
-print(hist.history['val_loss'])
-print("============================ history =================================")
+# print("============================ history =================================")
+# print(hist)
+# print("========================= hist.histoy ==============================")
+# print(hist.history)
+# print("============================= loss =================================")
+# print(hist.history['loss'])
+# print("=========================== val_loss =================================")
+# print(hist.history['val_loss'])
+# print("============================ history =================================")
 
 import matplotlib.pyplot as plt
 
@@ -172,4 +175,32 @@ r2 : 0.7048042150528292
 mse :  24.57323320582577
 RMSE :  4.9571396193597135
 훈련시간 : 3.76 sec
+
+-----------------------------------------------------------
+
+MaxAbsScaler
+
+Epoch 195/50000
+11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 23.3799 - val_loss: 26.6386
+===================================================
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - loss: 24.9934 
+loss(mse) :  24.993438720703125
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step
+r2 : 0.6997563019768627
+mse :  24.993440917262646
+RMSE :  4.9993440486990535
+훈련시간 : 12.61 sec
+
+----------------------------------------------------------------
+Robustscaler
+Epoch 57/50000
+11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 22.7813 - val_loss: 22.5517
+=====================keras28_boston==============================
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 26.1652
+loss(mse) :  26.16516876220703
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step
+r2 : 0.68568044832806
+mse :  26.16516914619045
+RMSE :  5.115190040085554
+훈련시간 : 4.39 sec
 """

@@ -1,37 +1,35 @@
 '''
-2026-09-10 (목)
-keras19_1  카피
-#1. 데이터
-훈련과정 x * w + b = y 를 실해중에
-x(원 데이터) 의 값이 너무 클 때,
-x(원 데이터들)를 동일한 비율로 크기를 작게(0~1) 만들어보자
+2026-09-11 (금)
+keras29_2  카피
 
-scaler 는 머신러닝, 딥러닝 과정중 오버플로우를 막아줄 수 있고,
-성능이 향상 될 수 있다.
+from tensorflow.keras.models import Sequential, load_model
 
-min_max_scaler : 0 ~ 1로 한정
-(x 최댓값 - x 최소값) 을 (x - x 최소값)으로 나눈 것
+#2. 모델
 
-standardscaler : 평균을 0으로 한정
+path = './_save/keras29/'
+model.save(path + 'keras29_1_save_model.keras')
 
-MaxAbsScaler : 절대값이 가장 큰 값의 절대값으로 나눠서 -1 ~ 1로 한정
+model = load_model(path + 'keras29_1_save_model.keras')
 
-RobustScaler : 데이터의 중앙값 = 0, IQR = 1이 되도록 스케일링하는 기법
-이상치에 강한 Scaler
-from sklearn.preprocessing import MinMaxScaler
+#3. 컴파일 훈련
 
+# model.save(path + 'keras29_1_save_model.keras')
+
+저장하는 위치에 따라 훈련 모델만 가져올지, 훈련이 완료된 가중치까지 가져올지 선택할 수 있다.
+1. #2 모델만 가져올래.
+2. #3 컴파일, 훈련까지 가져올래.
 '''
 
 import numpy as np
 import pandas as pd
 import time
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.datasets import fetch_california_housing
 
-# from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler
+# from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 #1. 데이터
 datasets = fetch_california_housing()
@@ -52,17 +50,7 @@ x_train, x_test, y_train, y_test = train_test_split(
     # shuffle = True
     random_state=20260910,
 )
-'''
-scaler.fit 은 x_train으로 한다.
-MinMaxScaler의 기준은 train이다.
-test 데이터는 train 데이터에 종속되면 안 된다.
-과적합 주의.
-scaler = MinMaxScaler()
-scaler.fit(x_train)
-x_train = scaler.transform(x_train)
-x_test = scaler.transform(x_test)
 
-'''
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
@@ -88,39 +76,52 @@ print(np.min(x_test), np.max(x_test))
 # exit()
 
 # 2. 모델 구성
+
 model = Sequential()
-model.add(Dense(128, input_shape=(8,)))    # input_dim = 8  -> input_shape = (8, )
-model.add(Dense(256))
+model.add(Dense(128, activation = 'relu', input_shape=(8,)))    # input_dim = 8  -> input_shape = (8, )
+model.add(Dense(256, activation = 'relu'))
 model.add(Dense(512))
-model.add(Dense(256))
+model.add(Dense(256, activation = 'relu'))
 model.add(Dense(128))
-model.add(Dense(64))
+model.add(Dense(64, activation = 'relu'))
 model.add(Dense(32))
 model.add(Dense(1))
 
+# model.summary()
+
+path = './_save/keras29/'
+# model.save(path + 'keras29_1_save_model.keras')
+# model = load_model(path + 'keras29_1_save_model.keras')
+
+# model.summary()
+
+# exit()
 
 # 3. 컴파일, 훈련
 model.compile(loss='mse', optimizer='adam')
 
 from tensorflow.keras.callbacks import EarlyStopping
-es = EarlyStopping(               # 최소 혹은 최대값을 구해주는 코드 (if문으로 구성되어있는 조건문)
-    monitor = 'val_loss',         # 모니터링 할게
-    mode = 'min',                 # 최소점
-    patience = 30,                # patience = n 번동안 갱신되지 않으면
-    restore_best_weights = True,  # 기본값 = false - 원칙적으론 true가 좋으나, false가 나을때도 있음.
+es = EarlyStopping(              
+    monitor = 'val_loss',        
+    mode = 'min',                 
+    patience = 30,                
+    restore_best_weights = True,  
 )
 
 
-start_time = time.time()     # 현재 시간을 반환. 시작시간
+start_time = time.time()    
 hist = model.fit(x_train, y_train, 
                  epochs=50000,
                  batch_size=600, 
                  validation_split=0.2,
                  callbacks=[es],
                  )
-end_time = time.time()       # 현재 시간을 반환. 종료시간
+end_time = time.time()      
 
-print("===================keras28 california==========================")
+model.save(path + 'keras29_3_save_model.keras')
+
+
+print("===================keras29_california==========================")
 
 
 #4. 평가, 예측
@@ -171,8 +172,8 @@ plt.xlabel('epochs')
 
 plt.ylabel('loss')
 
-plt.grid()    #격자 표시를 추가
-plt.show()    #
+plt.grid()    
+plt.show()    
 
 # exit()
 '''
@@ -257,7 +258,5 @@ RMSE :  0.8866434752002619
 훈련시간 : 16.15 sec
 
 '''
-
-
 
 

@@ -45,10 +45,13 @@ x_train, x_test, y_train, y_test = train_test_split(
     random_state=2414,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
-scaler = StandardScaler()
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
+
 scaler.fit(x_train)
 
 x_train = scaler.transform(x_train)
@@ -68,7 +71,7 @@ print(np.min(x_test), np.max(x_test))
 
 # 2. 모델 구성
 model = Sequential()
-model.add(Dense(16, activation='relu', input_shape=(8,)))    # relu는 음수를 없애주는 함수. -값을 0처리 한다.
+model.add(Dense(16, activation='relu', input_shape=(8,)))    
 model.add(Dense(32, activation='relu'))
 model.add(Dense(16, activation='relu'))
 model.add(Dense(8, activation='relu'))
@@ -79,23 +82,26 @@ model.add(Dense(1))
 model.compile(loss='mse', optimizer='adam')
 
 from tensorflow.keras.callbacks import EarlyStopping
-es = EarlyStopping(               # 최소 혹은 최대값을 구해주는 코드 (if문으로 구성되어있는 조건문)
-    monitor = 'val_loss',         # 모니터링 할게
-    mode = 'min',                 # 최소점
-    patience = 15,                # patience = n 번동안 갱신되지 않으면
-    restore_best_weights = True,  # 기본값 = false - 원칙적으론 true가 좋으나, false가 나을때도 있음.
+es = EarlyStopping(               
+    monitor = 'val_loss',         
+    mode = 'min',                 
+    patience = 30,                
+    restore_best_weights = True,  
 )
 
 
-start_time = time.time()     # 현재 시간을 반환. 시작시간
+start_time = time.time()     
+
 hist = model.fit(x_train, y_train, 
                  epochs=50000,
                  batch_size=32, 
                  validation_split=0.2,
                  callbacks=[es],
                  )
-end_time = time.time()       # 현재 시간을 반환. 종료시간
-print("=============================================")
+
+end_time = time.time()   
+
+print("====================keras28_kaggle_bike==============================")
 
 
 #4. 평가, 예측
@@ -188,7 +194,7 @@ RMSE :  150.53683882608271
 훈련시간 : 52.63 sec
 
 ==========================================================
-
+minmaxscaler
 Epoch 168/50000
 205/205 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - loss: 21284.6348 - val_loss: 21395.4414
 =============================================
@@ -200,6 +206,47 @@ mse :  22379.83203125
 RMSE :  149.59890384374478
 훈련시간 : 40.05 sec
 
+-----------------------------------------------------------------------
+standardsclaer
+Epoch 106/50000
+205/205 ━━━━━━━━━━━━━━━━━━━━ 0s 991us/step - loss: 21516.0898 - val_loss: 21691.8398
+=============================================
+86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 664us/step - loss: 22199.4844
+loss :  22199.484375
+86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 757us/step
+r2 = :  0.3435947299003601
+mse :  22199.48828125
+RMSE :  148.9949270319295
+훈련시간 : 25.12 sec
 
+----------------------------------------------------------------------------
+
+MaxAbsScaler
+
+Epoch 432/50000
+205/205 ━━━━━━━━━━━━━━━━━━━━ 0s 932us/step - loss: 21890.9414 - val_loss: 21875.0195
+=============================================
+86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 751us/step - loss: 22718.1094
+loss :  22718.109375
+86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 864us/step
+r2 = :  0.32826000452041626
+mse :  22718.107421875
+RMSE :  150.72527134450613
+훈련시간 : 101.5 sec
+
+-------------------------------------------------------
+
+RobustSclaer
+
+Epoch 285/50000
+205/205 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - loss: 21035.7207 - val_loss: 21495.0566
+====================keras28_kaggle_bike==============================
+86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 709us/step - loss: 22201.6289
+loss :  22201.62890625
+86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 785us/step
+r2 = :  0.3435313105583191
+mse :  22201.634765625
+RMSE :  149.00213007076442
+훈련시간 : 69.98 sec
 
 '''

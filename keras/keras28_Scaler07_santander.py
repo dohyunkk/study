@@ -87,9 +87,13 @@ print(x_train.shape, x_test.shape)
 print(y_train.shape, y_test.shape)
 # (140000, 2) (60000, 2)
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
-scaler = MinMaxScaler()
+# scaler = MinMaxScaler()
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
+
 scaler.fit(x_train)
 
 x_train = scaler.transform(x_train)
@@ -129,7 +133,7 @@ model.compile(loss='categorical_crossentropy',
 es = EarlyStopping(
     monitor = 'val_loss',
     mode = 'auto',
-    patience = 5,
+    patience = 30,
     restore_best_weights = True,
 )
 
@@ -146,6 +150,8 @@ model.fit(x_train, y_train,
 end_time = time.time()
 
 #.4 평가, 예측
+
+print('=============== keras28_santander ===========================')
 
 result = model.evaluate(x_test, y_test)
 print('loss : ', result[0])
@@ -180,14 +186,17 @@ print('============================================================')
 # csv_만들기
 # print(submission_csv)        # [200000 rows x 1 columns]
 # print(submission_csv.shape)  # (200000, 1)
-y_pred = model.predict(test_csv)
-y_pred = np.argmax(y_pred, axis = 1)
-print(np.unique(y_pred, return_counts=True)) 
+
+# y_pred = model.predict(test_csv)
+# y_pred = np.argmax(y_pred, axis = 1)
+
+# print(np.unique(y_pred, return_counts=True)) 
 # (array([0, 1]), array([193522,   6478]))
-print(y_pred.shape)
+# print(y_pred.shape)
 # (200000,)
-submission_csv['target'] = y_pred
-submission_csv.to_csv(path + "submit/" + "submit_0910_1040.csv")
+
+# submission_csv['target'] = y_pred
+# submission_csv.to_csv(path + "submit/" + "submit_0910_1040.csv")
 
 '''
 20/20 ━━━━━━━━━━━━━━━━━━━━ 3s 142ms/step - acc: 0.9562 - loss: 0.1212 - val_acc: 0.8921 - val_loss: 0.3507
@@ -199,6 +208,8 @@ acc :  0.91
 acc_score :  0.9104666666666666
 걸린시간 :  111.1 sec
 ============================================================
+
+minmaxscaler
 
 Epoch 97/10000
 12/12 ━━━━━━━━━━━━━━━━━━━━ 3s 263ms/step - acc: 0.9189 - loss: 0.2212 - val_acc: 0.9126 - val_loss: 0.2372
@@ -212,8 +223,48 @@ acc_score :  0.9159166666666667
 ============================================================
 6250/6250 ━━━━━━━━━━━━━━━━━━━━ 11s 2ms/step 
 
+---------------------------------------------------------------
+standardscaler
 
+Epoch 35/10000
+12/12 ━━━━━━━━━━━━━━━━━━━━ 3s 262ms/step - acc: 0.9971 - loss: 0.0088 - val_acc: 0.8854 - val_loss: 0.9822
+1875/1875 ━━━━━━━━━━━━━━━━━━━━ 4s 2ms/step - acc: 0.9129 - loss: 0.2386  
+loss :  0.2386406809091568
+acc :  0.91
+1875/1875 ━━━━━━━━━━━━━━━━━━━━ 3s 2ms/step  
+============================================================
+acc_score :  0.91285
+걸린시간 :  110.81 sec
+============================================================
 
+----------------------------------------------------------------------
+
+MaxAbsScaler
+
+Epoch 55/10000
+12/12 ━━━━━━━━━━━━━━━━━━━━ 3s 258ms/step - acc: 0.9408 - loss: 0.1696 - val_acc: 0.9060 - val_loss: 0.2916
+1875/1875 ━━━━━━━━━━━━━━━━━━━━ 3s 2ms/step - acc: 0.9132 - loss: 0.2365  
+loss :  0.236549973487854
+acc :  0.91
+1875/1875 ━━━━━━━━━━━━━━━━━━━━ 3s 2ms/step   
+============================================================
+acc_score :  0.9132166666666667
+걸린시간 :  170.4 sec
+============================================================
+
+---------------------------------------------------------------------------
+
+RobustScaler
+
+Epoch 35/10000
+12/12 ━━━━━━━━━━━━━━━━━━━━ 3s 261ms/step - acc: 1.0000 - loss: 1.6719e-05 - val_acc: 0.8886 - val_loss: 1.2395
+1875/1875 ━━━━━━━━━━━━━━━━━━━━ 3s 2ms/step - acc: 0.9117 - loss: 0.2394  
+loss :  0.23937946557998657
+acc :  0.91
+1875/1875 ━━━━━━━━━━━━━━━━━━━━ 3s 2ms/step   
+============================================================
+acc_score :  0.9117333333333333
+걸린시간 :  110.01 sec
 
 '''
 

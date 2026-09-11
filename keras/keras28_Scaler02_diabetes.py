@@ -23,10 +23,13 @@ x_train, x_test, y_train, y_test = train_test_split(
     random_state=95,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
-scaler = StandardScaler()
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
+
 scaler.fit(x_train)
 
 x_train = scaler.transform(x_train)
@@ -47,19 +50,35 @@ print(np.min(x_test), np.max(x_test))
 model = Sequential()
 model.add(Dense(100, input_shape=(10,)))
 model.add(Dense(70))
-model.add(Dense(40))
-model.add(Dense(20))
-model.add(Dense(10))
+model.add(Dense(140))
+model.add(Dense(100))
+model.add(Dense(50))
+model.add(Dense(25))
 model.add(Dense(1))
 
 # 3. 컴파일, 훈련
 model.compile(loss='mse', optimizer='adam')
 
+from tensorflow.keras.callbacks import EarlyStopping
+es = EarlyStopping(               # 최소 혹은 최대값을 구해주는 코드 (if문으로 구성되어있는 조건문)
+    monitor = 'val_loss',         # 모니터링 할게
+    mode = 'min',                 # 최소점
+    patience = 30,                # patience = n 번동안 갱신되지 않으면
+    restore_best_weights = True,  # 기본값 = false - 원칙적으론 true가 좋으나, false가 나을때도 있음.
+)
+
 start_time = time.time()     # 현재 시간을 반환. 시작시간
-hist = model.fit(x_train, y_train, epochs=100, batch_size=32, validation_split=0.2)
+
+hist = model.fit(x_train, y_train, 
+                 epochs=10000, 
+                 batch_size=32, 
+                 validation_split=0.2,
+                 callbacks=[es],
+                 )
+
 end_time = time.time()       # 현재 시간을 반환. 종료시간
 
-print("=============================================")
+print("=================== keras28_diabetes ==========================")
 
 #4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
@@ -84,15 +103,15 @@ print("RMSE : ", rmse)
 
 print("훈련시간 :", round(end_time - start_time, 2),"sec")
 
-print("============================ history =================================")
-print(hist)
-print("========================= hist.histoy ==============================")
-print(hist.history)
-print("============================= loss =================================")
-print(hist.history['loss'])
-print("=========================== val_loss =================================")
-print(hist.history['val_loss'])
-print("============================ history =================================")
+# print("============================ history =================================")
+# print(hist)
+# print("========================= hist.histoy ==============================")
+# print(hist.history)
+# print("============================= loss =================================")
+# print(hist.history['loss'])
+# print("=========================== val_loss =================================")
+# print(hist.history['val_loss'])
+# print("============================ history =================================")
 
 import matplotlib.pyplot as plt
 
@@ -147,6 +166,33 @@ mse :  3752.147764374862
 RMSE :  61.25477748204512
 훈련시간 : 6.97 sec
 
+-----------------------------------------------------------------
 
+MaxAbsScaler
+
+Epoch 100/100
+9/9 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 2659.1594 - val_loss: 2784.6941
+=============================================
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 3625.2837 
+loss :  3625.28369140625
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step
+r2 = :  0.4188517797515665
+mse :  3625.2836313195485
+RMSE :  60.21032827779258
+훈련시간 : 7.18 sec
+
+----------------------------------------------------------------------
+RobustScaler
+
+Epoch 74/10000
+9/9 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 2720.4141 - val_loss: 2683.5386
+=================== keras28_diabetes ==========================
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - loss: 3697.6072 
+loss :  3697.607177734375
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step
+r2 = :  0.4072580069437586
+mse :  3697.60720269247
+RMSE :  60.80795344930193
+훈련시간 : 5.64 sec
 
 """

@@ -61,9 +61,13 @@ x_train, x_test, y_train, y_test = train_test_split(
 # print(y_train.shape, y_test.shape)
 # (1257, 10) (540, 10)
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler,RobustScaler
 
-scaler = MinMaxScaler()
+# scaler = MinMaxScaler()
+# scaler = StandardScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
+
 scaler.fit(x_train)
 
 x_train = scaler.transform(x_train)
@@ -120,6 +124,8 @@ end_time = time.time()
 
 #.4 평가, 예측
 
+print("================ keras28_digits ========================")
+
 result = model.evaluate(x_test, y_test)
 print('loss : ', result[0])
 print('acc : ', round(result[1],2))
@@ -155,7 +161,7 @@ acc :  0.96
 acc_score :  0.9629629629629629
 
 ======================================================================
-
+minmaxscaler
 Epoch 59/10000
 32/32 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - acc: 1.0000 - loss: 3.5371e-07 - val_acc: 0.9676 - val_loss: 0.1815
 12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - acc: 0.9861 - loss: 0.0650
@@ -165,5 +171,43 @@ acc :  0.99
 acc_score :  0.9861111111111112
 걸린시간 :  11.43 sec
 
+=========================================================================
+standardscaler
+
+Epoch 55/10000
+32/32 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - acc: 1.0000 - loss: 5.5275e-07 - val_acc: 0.9792 - val_loss: 0.2090
+12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - acc: 0.9778 - loss: 0.0727 
+loss :  0.07268013805150986
+acc :  0.98
+12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step 
+acc_score :  0.9777777777777777
+걸린시간 :  11.36 sec
+
+----------------------------------------------------------------------
+
+MaxAbsScaler
+
+Epoch 58/10000
+32/32 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - acc: 1.0000 - loss: 1.1968e-07 - val_acc: 0.9745 - val_loss: 0.1976
+12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - acc: 0.9833 - loss: 0.0652
+loss :  0.06519828736782074
+acc :  0.98
+12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step 
+acc_score :  0.9833333333333333
+걸린시간 :  12.01 sec
+
+---------------------------------------------------------------------
+
+RobustScaler
+
+Epoch 63/10000
+32/32 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - acc: 1.0000 - loss: 1.3356e-07 - val_acc: 0.9583 - val_loss: 0.3049
+================ keras28_digits ========================
+12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - acc: 0.9472 - loss: 0.1825 
+loss :  0.1824563592672348
+acc :  0.95
+12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step 
+acc_score :  0.9472222222222222
+걸린시간 :  12.97 sec
 
 '''
