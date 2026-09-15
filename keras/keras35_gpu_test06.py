@@ -1,12 +1,12 @@
 '''
-# 2026-09-14 (월)
-keras31_06 에 30-2 접목
+# 2026-09-15 (화)
+keras28_cancer 카피
 
-from tensorflow.keras.models import load_model
+cpu와 gpu의 작업 시간(속도)의 차이를 확인한다
 '''
 import numpy as np
 import pandas as pd
-from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from sklearn.model_selection import train_test_split
 import time
@@ -87,29 +87,32 @@ print(np.min(x_test), np.max(x_test))
 # exit()
 
 # 2. 모델구성
-# model = Sequential()
-# model.add(Dense(90, input_shape=(30,), activation = 'relu'))
-# model.add(Dense(180, activation = 'relu'))
-# model.add(Dense(50, activation = 'relu'))
-# model.add(Dense(30, activation = 'relu'))
-# model.add(Dense(15, activation = 'relu'))
-# model.add(Dense(1, activation = 'sigmoid'))                  #★ activation= 'sigmoid'  디폴트는'Linear'
-#                                                              #★ 이진분류는 마지막 activation에 반드시 'sigmoid'
 
-# # 3. 컴파일, 훈련
-# model.compile(loss='binary_crossentropy',                    #★ 이진분류는 무조건 binary_crossentropy 
-#               optimizer='adam',
-#               metrics=['acc'], # metrics=['accuracy']
-#               )                                             
+from tensorflow.keras.layers import Dropout
 
-# es = EarlyStopping(
-#     monitor = 'val_loss',
-#     mode = 'min',
-#     patience = 20,
-#     restore_best_weights = True,
-# )
+model = Sequential()
+model.add(Dense(90, input_shape=(30,), activation = 'relu'))
+model.add(Dense(180, activation = 'relu'))
+model.add(Dropout(0.3))
+model.add(Dense(30, activation = 'relu'))
+model.add(Dense(15, activation = 'relu'))
+model.add(Dense(1, activation = 'sigmoid'))                  #★ activation= 'sigmoid'  디폴트는'Linear'
+                                                             #★ 이진분류는 마지막 activation에 반드시 'sigmoid'
 
-# #★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+# 3. 컴파일, 훈련
+model.compile(loss='binary_crossentropy',                    #★ 이진분류는 무조건 binary_crossentropy 
+              optimizer='adam',
+              metrics=['acc'], # metrics=['accuracy']
+              )                                             
+
+es = EarlyStopping(
+    monitor = 'val_loss',
+    mode = 'min',
+    patience = 20,
+    restore_best_weights = True,
+)
+
+#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -136,22 +139,20 @@ print(np.min(x_test), np.max(x_test))
 #     verbose = 1,
 # )
 
-# start_time = time.time()
+start_time = time.time()
 
-# hist = model.fit(x_train, y_train,
-#                  epochs = 1000,
-#                  batch_size = 32,
-#                  verbose = 1,
-#                  validation_split = 0.3,
-#                  callbacks = [es, mcp],
-#                  )
+hist = model.fit(x_train, y_train,
+                 epochs = 30,
+                 batch_size = 32,
+                 verbose = 1,
+                 validation_split = 0.3,
+                #  callbacks = [es,]# mcp],
+                 )
 
-# end_time = time.time()
+end_time = time.time()
 
-path = './_save/keras31/06_cancer/'
-model = load_model(path + 'k31_06_cancer_0914_1438-0003-0.1954.keras')
-print("================ keras31_cancer ====================")
 #4. 평가, 예측
+print("================ keras35_cancer ====================")
 loss = model.evaluate(x_test, y_test)
 print("====================================================")
 print('loss : ', loss[0])
@@ -181,7 +182,7 @@ print('acc_score : ', acc_score)
 # print('RMSE : ', rmse)
 
 
-# print("훈련시간 : ", round(end_time - start_time, 2),"sec")
+print("훈련시간 : ", round(end_time - start_time, 2),"sec")
 """
 print("========================= history ==================================")
 print(hist)
@@ -214,9 +215,12 @@ plt.show()    #
 """
 
 '''
-
-
-
+--gpu
+30에포
+훈련시간 :  2.44 sec
+--cpu
+30에포
+훈련시간 :  2.74 sec
 '''
 
 

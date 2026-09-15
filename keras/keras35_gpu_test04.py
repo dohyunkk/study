@@ -1,14 +1,16 @@
 '''
-2026-09-14 (월)
-31_4에 30_2 접목
+2026-09-15 (화)
+keras31_4 카피
 
 https://dacon.io/competitions/open/235576/data
+
+cpu와 gpu의 작업 시간(속도)의 차이를 확인한다
 '''
 
 
 
 import numpy as np
-from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
@@ -102,26 +104,29 @@ print(np.min(x_test), np.max(x_test))
 # exit()
 
 #2. 모델 구성
-# model = Sequential()
-# model.add(Dense(18, input_shape=(9,)))
-# model.add(Dense(9))
-# model.add(Dense(5))
-# model.add(Dense(1))
+
+from tensorflow.keras.layers import Dropout
+
+model = Sequential()
+model.add(Dense(18, input_shape=(9,)))
+model.add(Dropout(0.2))
+model.add(Dense(5))
+model.add(Dense(1))
 
 
-# from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-# # 3. 컴파일, 훈련
-# model.compile(loss='mse', optimizer='adam')
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+# 3. 컴파일, 훈련
+model.compile(loss='mse', optimizer='adam')
 
 
-# es = EarlyStopping(               
-#     monitor = 'val_loss',         
-#     mode = 'min',                 
-#     patience = 15,                
-#     restore_best_weights = True,  
-# )
+es = EarlyStopping(               
+    monitor = 'val_loss',         
+    mode = 'min',                 
+    patience = 15,                
+    restore_best_weights = True,  
+)
 
-# #★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -135,10 +140,10 @@ print(np.min(x_test), np.max(x_test))
 # filename = '{epoch:04d}-{val_loss:.4f}.keras'
 # filepath = "".join([path, 'k31_', 'ddarung_', date, "-",filename])
 
-# # 내가 생각하는 파일명 ex)
-# # './_save/keras30/' + 'k30_' + '0914_1147' + '0530-0.001.keras'
+# 내가 생각하는 파일명 ex)
+# './_save/keras30/' + 'k30_' + '0914_1147' + '0530-0.001.keras'
 
-# #★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
+#★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
 
 # mcp = ModelCheckpoint(
 #     monitor = 'val_loss',
@@ -148,20 +153,16 @@ print(np.min(x_test), np.max(x_test))
 #     verbose = 1,
 # )
 
-# start_time = time.time()     
-# hist = model.fit(x_train, y_train, 
-#                  epochs=50000,
-#                  batch_size=32, 
-#                  validation_split=0.2,
-#                  callbacks=[es, mcp],
-#                  )
-# end_time = time.time()       
-path = './_save/keras31/04_ddarung/'
+start_time = time.time()     
+hist = model.fit(x_train, y_train, 
+                 epochs=30,
+                 batch_size=32, 
+                 validation_split=0.2,
+                #  callbacks=[es, ] # mcp],
+                 )
+end_time = time.time()       
 
-model = load_model(path + 'k31_04_ddarung_0914_1428-0044-2821.7031.keras')
-
-
-print("===================== keras32_load_ddarung ================================")
+print("===================== keras35_ddarung ================================")
 
 #4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
@@ -195,7 +196,7 @@ print("RMSE : ", rmse)
 # mse :  2679.2930744357695
 # RMSE :  51.761888242564815
 
-# print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2),"sec")
 
 # print("============================ history =================================")
 # print(hist)
@@ -226,22 +227,12 @@ print("RMSE : ", rmse)
 
 
 """
+--gpu-------------------------------------------
+Epoch 30/30
 
-===================== keras31_ddarung ================================
-11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - loss: 2958.3503 
-loss :  2958.350341796875
-11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step 
-r2 = :  0.5262083782889981
-mse :  2958.3503296135264
-RMSE :  54.390719149626314
-훈련시간 : 7.15 sec
+훈련시간 : 2.53 sec
+--cpu-------------------------------------------
+Epoch 30/30
 
-===================== keras32_load_ddarung ================================
-11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - loss: 2959.8242 
-loss :  2959.82421875
-11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step 
-r2 = :  0.5259723111620227
-mse :  2959.824330484156
-RMSE :  54.40426757602896
-
+훈련시간 : 2.9 sec
 """

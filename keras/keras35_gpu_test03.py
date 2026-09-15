@@ -1,17 +1,16 @@
 '''
-2026-09-14 (월)
-keras31_3에 30-2 접목
+2026-09-15 (화)
+# 31_3_boston 카피
+
+cpu와 gpu의 작업 시간(속도)의 차이를 확인한다
 '''
 
-from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.datasets import boston_housing
 from sklearn.model_selection import train_test_split
 import numpy as np
 import time
-
-
-path = './_save/keras31/03_boston/'
 # 1. 데이터
 (x_train, y_train), (x_test, y_test) = boston_housing.load_data()
 # print(x_train.shape, x_test.shape) # (404, 13) (102, 13)
@@ -42,28 +41,31 @@ print(np.min(x_test), np.max(x_test))
 
 
 # 2. 모델구성
-# model = Sequential()
-# model.add(Dense(64,input_shape=(13,)))
-# model.add(Dense(32))
-# model.add(Dense(16))
-# model.add(Dense(1))
+
+from tensorflow.keras.layers import Dropout
+
+model = Sequential()
+model.add(Dense(64,input_shape=(13,)))
+model.add(Dropout(0.3))
+model.add(Dense(16))
+model.add(Dense(1))
 
 
 # 3. 컴파일, 훈련
-# from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint   # ★ ModelCheckpoint
+from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint   # ★ ModelCheckpoint
 
 
-# model.compile(loss='mse', optimizer='adam')
+model.compile(loss='mse', optimizer='adam')
 
-# es = EarlyStopping(              
-#     monitor = 'val_loss',        
-#     mode = 'min',                 
-#     patience = 30,                
-#     restore_best_weights = True,
-#     verbose = 1,
-#     )
+es = EarlyStopping(              
+    monitor = 'val_loss',        
+    mode = 'min',                 
+    patience = 30,                
+    restore_best_weights = True,
+    verbose = 1,
+    )
 
-# #★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -90,21 +92,18 @@ print(np.min(x_test), np.max(x_test))
 #     verbose = 1,
 # )
 
-# start_time = time.time()    
+start_time = time.time()    
 
-# hist = model.fit(x_train, y_train, 
-#                  epochs=50000,
-#                  batch_size=32, 
-#                  validation_split=0.2,
-#                  callbacks=[es, mcp ],              # ★callbacks = [mcp],
-#                  )
+hist = model.fit(x_train, y_train, 
+                 epochs=30,
+                 batch_size=32, 
+                 validation_split=0.2,
+                #  callbacks=[es]#, mcp ],              # ★callbacks = [mcp],
+                 )
 
-# end_time = time.time()      
+end_time = time.time()      
 
-
-model = load_model(path + 'k31_03_boston_0914_1413-0055-21.2055.keras')   
-
-print("=====================keras32_boston==============================")
+print("=====================keras35_boston==============================")
 # 4. 평가, 예측
 loss = model.evaluate(x_test, y_test, )
 print('loss(mse) : ', loss)
@@ -133,7 +132,7 @@ print("RMSE : ", rmse)
 # loss(mse) :  54.49088668823242
 # r2 : 0.34540641003351025
 
-# print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2),"sec")
 
 # print("============================ history =================================")
 # print(hist)
@@ -164,21 +163,26 @@ print("RMSE : ", rmse)
 
 
 """
-
-=====================keras31_boston==============================
-4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 24.4663 
-loss(mse) :  24.466289520263672
-4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step
-r2 : 0.7060889062198299
-mse :  24.466290568925242
-RMSE :  4.946341129453693
-
-=====================keras32_load_boston==============================
-4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 24.4663  
-loss(mse) :  24.466289520263672
-4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step 
-r2 : 0.7060889062198299
-mse :  24.466290568925242
-RMSE :  4.946341129453693
-
+--gpu-------------------------------------------
+Epoch 30/30
+11/11 [==============================] - 0s 3ms/step - loss: 73.3330 - val_loss: 48.1820
+=====================keras35_boston==============================
+4/4 [==============================] - 0s 1ms/step - loss: 47.0569
+loss(mse) :  47.056861877441406
+4/4 [==============================] - 0s 1ms/step
+r2 : 0.4347106376419698
+mse :  47.05686204998625
+RMSE :  6.859800438058403
+훈련시간 : 2.11 sec
+--cpu-------------------------------------------
+Epoch 30/30
+11/11 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 67.5976 - val_loss: 44.7122
+=====================keras35_boston==============================
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - loss: 39.6326 
+loss(mse) :  39.63264465332031
+4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step 
+r2 : 0.5238969978824023
+mse :  39.632646188099365
+RMSE :  6.295446464556693
+훈련시간 : 2.37 sec
 """

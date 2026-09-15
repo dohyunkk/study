@@ -1,12 +1,14 @@
 '''
-2026-09-14 (월)
-31-5에 30-2 접목
+2026-09-15 (화)
+
 # https://www.kaggle.com/competitions/bike-sharing-demand/data
+
+cpu와 gpu의 작업 시간(속도)의 차이를 확인한다
 '''
 
 import numpy as np
 import pandas as pd
-from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
@@ -69,26 +71,29 @@ print(np.min(x_test), np.max(x_test))
 
 
 # 2. 모델 구성
-# model = Sequential()
-# model.add(Dense(16, activation='relu', input_shape=(8,)))    
-# model.add(Dense(32, activation='relu'))
-# model.add(Dense(16, activation='relu'))
-# model.add(Dense(8, activation='relu'))
-# model.add(Dense(1))
+
+from tensorflow.keras.layers import Dropout
+
+model = Sequential()
+model.add(Dense(16, activation='relu', input_shape=(8,)))    
+model.add(Dropout(0.3))
+model.add(Dense(16, activation='relu'))
+model.add(Dense(8, activation='relu'))
+model.add(Dense(1))
 
 
-# # 3. 컴파일, 훈련
-# model.compile(loss='mse', optimizer='adam')
+# 3. 컴파일, 훈련
+model.compile(loss='mse', optimizer='adam')
 
-# from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-# es = EarlyStopping(               
-#     monitor = 'val_loss',         
-#     mode = 'min',                 
-#     patience = 30,                
-#     restore_best_weights = True,  
-# )
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+es = EarlyStopping(               
+    monitor = 'val_loss',         
+    mode = 'min',                 
+    patience = 30,                
+    restore_best_weights = True,  
+)
 
-# #★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -115,20 +120,20 @@ print(np.min(x_test), np.max(x_test))
 #     verbose = 1,
 # )
 
-# start_time = time.time()     
+start_time = time.time()     
 
-# hist = model.fit(x_train, y_train, 
-#                  epochs=50000,
-#                  batch_size=32, 
-#                  validation_split=0.2,
-#                  callbacks=[es, mcp],
-#                  )
+hist = model.fit(x_train, y_train, 
+                 epochs=30,
+                 batch_size=32, 
+                 validation_split=0.2,
+                #  callbacks=[es, ]# mcp],
+                 )
 
-# end_time = time.time()   
+end_time = time.time()   
 
-path = './_save/keras31/05_kaggle_bike/'
-model = load_model(path + 'k31_05_kaggle_bike_0914_1432-0160-21887.7305.keras')
-print("====================keras32_load_kaggle_bike==============================")
+print("====================keras35_kaggle_bike==============================")
+
+
 #4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
 print('loss : ', loss)
@@ -161,7 +166,7 @@ print("RMSE : ", rmse)
 
 # submission.to_csv(path + "submit/" + "submit_0907_1014.csv")
 
-# print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2),"sec")
 
 # print("============================ history =================================")
 # print(hist)
@@ -193,20 +198,12 @@ print("RMSE : ", rmse)
 
 
 '''
-====================keras31_kaggle_bike==============================
-86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 690us/step - loss: 22389.6914
-loss :  22389.69140625
-86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 812us/step
-r2 = :  0.3379707932472229
-mse :  22389.689453125
-RMSE :  149.63184638680698
-훈련시간 : 48.19 sec
+--gpu-------------------------------------------
+Epoch 30/30
 
-====================keras32_load_kaggle_bike==============================
-86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 955us/step - loss: 22389.6914
-loss :  22389.69140625
-86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 779us/step
-r2 = :  0.3379707932472229
-mse :  22389.689453125
-RMSE :  149.63184638680698
+훈련시간 : 12.55 sec
+--cpu-------------------------------------------
+Epoch 30/30
+
+훈련시간 : 7.61 sec
 '''
