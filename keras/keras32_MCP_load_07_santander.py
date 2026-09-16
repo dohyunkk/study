@@ -113,71 +113,77 @@ print(np.min(x_test), np.max(x_test))
 
 #2. 모델
 
-model = Sequential()
-model.add(Dense(1000, input_shape = (200,), activation = 'relu'))
-model.add(Dense(800, activation = 'relu'))
-model.add(Dense(1200, activation = 'relu'))
-model.add(Dense(600, activation = 'relu'))
-model.add(Dense(400, activation = 'relu'))
-model.add(Dense(200, activation = 'relu'))
-model.add(Dense(2, activation = 'softmax'))
+# model = Sequential()
+# model.add(Dense(1000, input_shape = (200,), activation = 'relu'))
+# model.add(Dense(800, activation = 'relu'))
+# model.add(Dense(1200, activation = 'relu'))
+# model.add(Dense(600, activation = 'relu'))
+# model.add(Dense(400, activation = 'relu'))
+# model.add(Dense(200, activation = 'relu'))
+# model.add(Dense(2, activation = 'softmax'))
 
 
-#3. 컴파일, 훈련
+# #3. 컴파일, 훈련
 
-model.compile(loss='categorical_crossentropy',
-              optimizer = 'adam',
-              metrics=['acc'],
-              )
+# model.compile(loss='categorical_crossentropy',
+#               optimizer = 'adam',
+#               metrics=['acc'],
+#               )
 
-es = EarlyStopping(
-    monitor = 'val_loss',
-    mode = 'auto',
-    patience = 30,
-    restore_best_weights = True,
-)
+# es = EarlyStopping(
+#     monitor = 'val_loss',
+#     mode = 'auto',
+#     patience = 30,
+#     restore_best_weights = True,
+# )
 
-#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
-import datetime
+# #★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+# import datetime
 
-date = datetime.datetime.now()
-# print(date)         # 2026-09-14 11:42:10.635267
-# print(type(date))   # <class 'datetime.datetime'>        # ★ calss
-date = date.strftime("%m%d_%H%M")
-# print(date)         # 2026-09-14 11:48:27.764409
-# print(type(date))   # <class 'datetime.datetime'>
+# date = datetime.datetime.now()
+# # print(date)         # 2026-09-14 11:42:10.635267
+# # print(type(date))   # <class 'datetime.datetime'>        # ★ calss
+# date = date.strftime("%m%d_%H%M")
+# # print(date)         # 2026-09-14 11:48:27.764409
+# # print(type(date))   # <class 'datetime.datetime'>
 
-path = './_save/keras31/'
-filename = '{epoch:04d}-{val_loss:.4f}.keras'
-filepath = "".join([path, 'k31_07_santander_', date, "-",filename])
+# path = './_save/keras31/'
+# filename = '{epoch:04d}-{val_loss:.4f}.keras'
+# filepath = "".join([path, 'k31_07_santander_', date, "-",filename])
 
-#★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
+# #★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
 
-# exit()
+# # exit()
 
-mcp = ModelCheckpoint(
-    monitor = 'val_loss',
-    mode = 'auto',
-    save_best_only = True,
-    filepath = filepath,
-    verbose = 1,
-)
+# mcp = ModelCheckpoint(
+#     monitor = 'val_loss',
+#     mode = 'auto',
+#     save_best_only = True,
+#     filepath = filepath,
+#     verbose = 1,
+# )
 
-start_time = time.time()
+# start_time = time.time()
 
-model.fit(x_train, y_train,
-          epochs = 10000,
-          batch_size = 10000,
-          verbose = 1,
-          validation_split = 0.2,
-          callbacks = [es, mcp],
-          )
+# model.fit(x_train, y_train,
+#           epochs = 10000,
+#           batch_size = 10000,
+#           verbose = 1,
+#           validation_split = 0.2,
+#           callbacks = [es, mcp],
+#           )
 
-end_time = time.time()
+# end_time = time.time()
+
+from tensorflow.keras.models import load_model
+paht = 
+
+model = 
+
 
 #.4 평가, 예측
 
-print('=============== keras31_santander ===========================')
+print('=============== keras32_load_santander ===========================')
 
 result = model.evaluate(x_test, y_test)
 print('loss : ', result[0])
