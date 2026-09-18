@@ -86,8 +86,8 @@ print(np.min(x_train), np.max(x_train))
 print(np.min(x_test), np.max(x_test))
 # 
 
-x_train = x_train.reshape(-1, 10, 1, 1)
-x_test = x_test.reshape(-1, 10, 1, 1)
+x_train = x_train.reshape(-1, 64, 1, 1)
+x_test = x_test.reshape(-1, 64, 1, 1)
 
 print(x_train.shape) # (331, 10, 1, 1)
 
@@ -96,16 +96,16 @@ print(x_train.shape) # (331, 10, 1, 1)
 #2. 모델
 
 model = Sequential()
-model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu', input_shape = (, 1, 1)))
-model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(128, (2, 1), padding = 'same', activation = 'relu', input_shape = (64, 1, 1)))
+model.add(Conv2D(128, (2, 1), padding = 'same', activation = 'relu'))
 model.add(Dropout(0.2))
 
-model.add(Conv2D(32, (2, 1), padding = 'same', activation = 'relu'))
-model.add(Conv2D(32, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu'))
 model.add(Dropout(0.3))
 
 model.add(GlobalAveragePooling2D())
-model.add(Dense(16, activation='relu'))
+model.add(Dense(32, activation='relu'))
 model.add(Dense(10, activation = 'softmax'))
 
 
@@ -168,5 +168,11 @@ print('acc_score : ', accuracy_score)
 print('걸린시간 : ', round(end_time - start_time, 2),'sec')
 
 '''
-
+================ keras42_cnn_digits ========================
+12/12 [==============================] - 0s 12ms/step - loss: 0.4382 - acc: 0.8694
+loss :  0.4382067918777466
+acc :  0.87
+12/12 [==============================] - 0s 1ms/step
+acc_score :  0.8694444444444445
+걸린시간 :  26.43 sec
 '''

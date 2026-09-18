@@ -78,7 +78,7 @@ y = pd.get_dummies(y, dtype=int)
 
 # exit()
 
-
+# tarain_test_ 분리
 
 x_train, x_test, y_train, y_test = train_test_split(
     x, y,
@@ -92,7 +92,7 @@ print(x_train.shape, x_test.shape)
 print(y_train.shape, y_test.shape)
 # (140000, 2) (60000, 2)
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
+# 스케일러
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()

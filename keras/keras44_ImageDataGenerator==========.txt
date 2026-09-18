@@ -1,0 +1,5 @@
+2026-09-18 (금)
+
+for문은 이터레이터의 정보를 읽기 좋다.
+
+from keras.preprocessing.image import ImageDataGenerator

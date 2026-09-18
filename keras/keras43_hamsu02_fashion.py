@@ -1,9 +1,9 @@
 '''
-2026-09-17 (목)
+2026-09-18 (금)
 
-Cnn -> Dnn
+Dnn -> 함수형
 
-!! 목표 : cnn 모델을 dnn 모델로 리모델링
+!! 목표 : dnn 모델을 함수형 모델로 리모델링
 '''
 
 import numpy as np
@@ -66,22 +66,44 @@ print(y_train.shape, y_test.shape)
 
 # 2.모델구성
 # DNN 모델
-model = Sequential()
-model.add(Dense(1564, activation='relu', input_shape = (784,)))
-model.add(Dropout(0.2))
+# model = Sequential()
+# model.add(Dense(1564, activation='relu', input_shape = (784,)))
+# model.add(Dropout(0.2))
 
-model.add(Dense(784, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(784, activation='relu'))
+# model.add(Dropout(0.3))
 
-model.add(Dense(392, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(392, activation='relu'))
+# model.add(Dropout(0.3))
 
-model.add(Dense(194, activation='relu'))
-model.add(Dropout(0.4))
+# model.add(Dense(194, activation='relu'))
+# model.add(Dropout(0.4))
 
-model.add(Dense(10, activation='softmax'))
+# model.add(Dense(10, activation='softmax'))
 
-# CNN 모델
+# 함수형
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input
+
+input1 = Input(shape=(784,))
+dense1 = Dense(1564, activation = 'relu')(input1)
+drop1 = Dropout(0.2)(dense1)
+
+dense2 = Dense(784, activation = 'relu')(drop1)
+drop2 = Dropout(0.3)(dense2)
+
+dense3 = Dense(392, activation = 'relu')(drop2)
+drop4 = Dropout(0.3)(dense3)
+
+dense4 = Dense(194, activation = 'relu')(drop4)
+drop5 = Dropout(0.4)(dense4)
+
+output1 = Dense(10, activation = 'softmax')(drop5)
+
+model = Model(inputs=input1, outputs=output1)
+
+
+# CNN모델
 # # 블록 1: padding='same'으로 입력 크기 (28, 28)를 유지하여 외곽 정보 보존
 # model.add(Conv2D(32, (3, 3), padding='same', input_shape=(28, 28, 1), activation='relu'))
 # model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
@@ -131,7 +153,7 @@ end_time = time.time()
 
 
 #4. 평가, 예측
-print("------------------ 41_dnn_fashion_model.evaluate --------------------")
+print("------------------ 43_hamsu_fashion_model.evaluate --------------------")
 loss = model.evaluate(x_test, y_test, verbose = 1)
 print('loss : ', loss[0])
 print('acc : ', loss[1])
@@ -158,15 +180,14 @@ acc :  0.9279999732971191
 accuracy_score :  0.928
 걸린 시간 :  114.16 sec
 
-dnn
-Epoch 30: early stopping
------------------- 41_dnn_fashion_model.evaluate --------------------
-313/313 [==============================] - 0s 1ms/step - loss: 0.3474 - acc: 0.8843
-loss :  0.3474321663379669
-acc :  0.8842999935150146
-313/313 [==============================] - 0s 1ms/step
-accuracy_score :  0.8843
-걸린 시간 :  46.28 sec
+Epoch 39: early stopping
+------------------ 43_hamsu_fashion_model.evaluate --------------------
+313/313 [==============================] - 0s 1ms/step - loss: 0.3381 - acc: 0.8860
+loss :  0.3380599021911621
+acc :  0.8859999775886536
+313/313 [==============================] - 0s 883us/step
+accuracy_score :  0.886
+걸린 시간 :  35.83 sec
 
 
 '''

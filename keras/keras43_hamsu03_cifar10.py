@@ -1,8 +1,8 @@
 '''
-2026-09-17 (목)
-Cnn -> Dnn
+2026-09-18 (금)
+Dnn -> 함수형
 
-!! 목표 : cnn 모델을 dnn 모델로 리모델링
+!! 목표 : dnn 모델을 함수형 모델로 리모델링
 '''
 
 import numpy as np
@@ -59,23 +59,45 @@ y_test = ohe.fit_transform(y_test)
 
 # 2. 모델구성 
 # DNN 모델
-model = Sequential()
-model.add(Dense(3072, activation='relu', input_shape = (3072,)))
-model.add(Dropout(0.2))
+# model = Sequential()
+# model.add(Dense(3072, activation='relu', input_shape = (3072,)))
+# model.add(Dropout(0.2))
 
-model.add(Dense(1512, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(1512, activation='relu'))
+# model.add(Dropout(0.3))
 
-model.add(Dense(756, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(756, activation='relu'))
+# model.add(Dropout(0.3))
 
-model.add(Dense(256, activation='relu'))
-model.add(Dropout(0.4))
+# model.add(Dense(256, activation='relu'))
+# model.add(Dropout(0.4))
 
 
-model.add(Dense(10, activation='softmax'))
+# model.add(Dense(10, activation='softmax'))
 
-#CNN 모델
+# 함수형
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input
+
+input1 = Input(shape=(3072,))
+dense1 = Dense(3072, activation = 'relu')(input1)
+drop1 = Dropout(0.2)(dense1)
+
+dense2 = Dense(1512, activation = 'relu')(drop1)
+drop2 = Dropout(0.3)(dense2)
+
+dense3 = Dense(756, activation = 'relu')(drop2)
+drop4 = Dropout(0.3)(dense3)
+
+dense4 = Dense(256, activation = 'relu')(drop4)
+drop5 = Dropout(0.4)(dense4)
+
+output1 = Dense(10, activation = 'softmax')(drop5)
+
+model = Model(inputs=input1, outputs=output1)
+
+
+# CNN 모델
 # # [앞단] 이미지의 기본 특징을 촘촘하게 추출 (드롭아웃 없이 정보 온전히 보존)
 # model.add(Conv2D(64, (3, 3), padding='same', activation='relu', input_shape=(32, 32, 3))) # (26, 26, 32)
 # model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))                          # (24, 24, 32)
@@ -129,7 +151,7 @@ end_time = time.time()
 
 
 #4. 평가, 예측
-print("------------------ 41_dnn_cifar10_model.evaluate --------------------")
+print("------------------ 43_hamsu_cifar10_model.evaluate --------------------")
 loss = model.evaluate(x_test, y_test, verbose = 1)
 print('loss : ', loss[0])
 print('acc : ', loss[1])
@@ -155,13 +177,13 @@ acc :  0.7989000082015991
 accuracy_score :  0.7989
 걸린 시간 :  469.75 sec
 
-dnn
-Epoch 38: early stopping
------------------- 41_dnn_cifar10_model.evaluate --------------------
-313/313 [==============================] - 1s 2ms/step - loss: 1.4887 - acc: 0.4846
-loss :  1.4887492656707764
-acc :  0.4846000075340271
-313/313 [==============================] - 1s 1ms/step
-accuracy_score :  0.4846
-걸린 시간 :  141.43 sec
+함수형
+Epoch 81: early stopping
+------------------ 43_hamsu_cifar10_model.evaluate --------------------
+313/313 [==============================] - 3s 8ms/step - loss: 1.4527 - acc: 0.4866
+loss :  1.4526870250701904
+acc :  0.48660001158714294
+313/313 [==============================] - 1s 4ms/step
+accuracy_score :  0.4866
+걸린 시간 :  208.49 sec
 '''
