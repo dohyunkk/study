@@ -144,7 +144,7 @@ date = date.strftime("%m%d_%H%M")
 print(date)         # 2026-09-14 11:48:27.764409
 print(type(date))   # <class 'datetime.datetime'>
 
-path = './_save/keras46/'
+path = './_save/keras46/01/'
 filename = '{epoch:04d}-{val_loss:.4f}.keras'
 filepath = "".join([path, 'horse-human_', date, "-",filename])
 
@@ -189,6 +189,12 @@ print('accuracy_score : ', acc_score)
 print('걸린 시간 : ', round(end_time - start_time, 2),'sec')
 
 '''
-
+Epoch 00055: early stopping
+------------------ keras46_horse-human --------------------
+26/26 [==============================] - 0s 15ms/step - loss: 0.0304 - acc: 0.9903
+loss :  0.03043726645410061
+acc :  0.9902912378311157
+accuracy_score :  0.9902912621359223
+걸린 시간 :  118.75 sec
 
 '''

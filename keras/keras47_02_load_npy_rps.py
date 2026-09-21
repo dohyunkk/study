@@ -3,88 +3,29 @@
 
 
 '''
-
+from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
-import time
 
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Conv2D, Flatten, Dropout
 from tensorflow.python.keras.layers import MaxPooling2D, GlobalAveragePooling2D
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
-from keras.preprocessing.image import ImageDataGenerator
+import time
 
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 
-
-train_datagen = ImageDataGenerator(
-    rescale = 1./255,
-    # horizontal_flip = True,     # 수평 뒤집기  (좌우반전)(상하반전)
-    # # 이미지의 데이터를 증폭, 변환할 수 있다.
-    # vertical_flip = True,       # 수직 뒤집기  (상하반전)(좌우반전)
-    # width_shift_range = 0.1,    # 평행이동
-    # height_shift_range = 0.1,   # 수직이동
-    # rotation_range = 5,         # 각도조절(정해진 각도만큼 이미지 회전)
-    # zoom_range = 1.2,           # 확대
-    # shear_range = 0.7,          # 좌표하나를 고정하고 다른 몇개의 좌표를 이동 (한 마디로 찌부)
-    # fill_mode = 'nearest',
-)
-
-test_datagen = ImageDataGenerator(
-    rescale = 1./255,
-)
-
-# 경로지정
-path_data = './_data/image/horse-human/'
+np_path = './_data/save_rps_npy/'
 
 
+x_train = np.load(np_path + 'keras46_02_x_train.npy') 
+y_train = np.load(np_path + 'keras46_02_y_train.npy') 
+x_test = np.load(np_path + 'keras46_02_x_test.npy')
+y_test = np.load(np_path + 'keras46_02_y_test.npy')
 
-xy = train_datagen.flow_from_directory(
-    path_data,                      # 경로
-    target_size = (300, 300),
-    batch_size = 1027,
-    class_mode = 'binary',           # 이진분류
-    color_mode = 'rgb',         # 컬러
-    shuffle = True,
-)
-# Found 1027 images belonging to 2 classes.
-
-# print(xy[0][0].shape)      # (1027, 300, 300, 3)
-# print(xy[0][1].shape)      # (1027,)
-
-# print(xy[0][0])           # 여기부터 에러. 이유는 160장이다 !! 배치는 10개니까
-
-# print(type(xy))            # <class 'keras.preprocessing.image.DirectoryIterator'>
-# print(type(xy[0]))         # <class 'tuple'>   # tuple, list와 비슷한데 저장이 안 된다.
-# print(type(xy[0][0]))      # <class 'numpy.ndarray'>
-# print(type(xy[0][1]))      # <class 'numpy.ndarray'>
+print(x_train.shape, y_train.shape) # (1638, 300, 300, 3) (1638, 3)
+print(x_test.shape, y_test.shape)   # (410, 300, 300, 3) (410, 3)
 
 # exit()
-
-x = xy[0][0]
-y = xy[0][1]
-
-
-x_train, x_test, y_train, y_test =  train_test_split(
-    x, y,
-    random_state = 260921,
-    train_size = 0.8,
-    stratify = y,
-)
-# print(x_train.shape, y_train.shape)   # (821, 300, 300, 3) (821,)
-# print(x_test.shape, y_test.shape)     # (206, 300, 300, 3) (206,)
-
-
-np_path = './_data/save_horse-human_npy/'
-np.save(np_path + 'keras46_01_x_train.npy', arr = x_train) # x_train
-np.save(np_path + 'keras46_01_y_train.npy', arr = y_train) # y_train
-np.save(np_path + 'keras46_01_x_test.npy', arr = x_test) # x_test
-np.save(np_path + 'keras46_01_y_test.npy', arr = y_test) # y_test
-
-
-# exit()
-
-#2. 모델구성
 
 #2. 모델구성 (유닛 강화 및 Dropout 완화)
 model = Sequential()
@@ -117,12 +58,14 @@ model.add(Dropout(0.4))
 model.add(GlobalAveragePooling2D()) 
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(1, activation='sigmoid'))
+model.add(Dense(3, activation='softmax'))
 
 model.summary()
 
+
+
 #3. 컴파일, 훈련
-model.compile(loss='binary_crossentropy', optimizer = 'adam', 
+model.compile(loss='categorical_crossentropy', optimizer = 'adam', 
               metrics=['acc'],
 )
 
@@ -138,15 +81,15 @@ es = EarlyStopping(
 import datetime
 
 date = datetime.datetime.now()
-print(date)         # 2026-09-14 11:42:10.635267
+print(date)         
 print(type(date))   # <class 'datetime.datetime'>        # ★ calss
 date = date.strftime("%m%d_%H%M")
-print(date)         # 2026-09-14 11:48:27.764409
+print(date)         
 print(type(date))   # <class 'datetime.datetime'>
 
-path = './_save/keras46/'
+path = './_save/keras47/'
 filename = '{epoch:04d}-{val_loss:.4f}.keras'
-filepath = "".join([path, 'horse-human_', date, "-",filename])
+filepath = "".join([path, 'rps', date, "-",filename])
 
 #★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
 
@@ -172,7 +115,7 @@ end_time = time.time()
 
 
 #4. 평가, 예측
-print("------------------ keras46_horse-human --------------------")
+print("------------------ keras47_rps_ImageDataGenerator3 --------------------")
 loss = model.evaluate(x_test, y_test, 
                       verbose = 1,
                       batch_size = 8,
@@ -182,13 +125,28 @@ print('acc : ', loss[1])
 
 y_predict = model.predict(x_test)
 
-y_predict = np.round(y_predict) 
+y_test_arg = np.argmax(y_test, axis=1)         # 원래 정답의 최대값 인덱스 추출 (1차원화)
+y_predict_arg = np.argmax(y_predict, axis=1)   # 예측된 확률의 최대값 인덱스 추출 (1차원화)
 
-acc_score = accuracy_score(y_test, y_predict)
+acc_score = accuracy_score(y_test_arg, y_predict_arg)
 print('accuracy_score : ', acc_score)
 print('걸린 시간 : ', round(end_time - start_time, 2),'sec')
 
 '''
+Epoch 00045: early stopping
+------------------ keras47_rps_ImageDataGenerator3 --------------------
+52/52 [==============================] - 1s 13ms/step - loss: 4.1146e-06 - acc: 1.0000
+loss :  4.1145735849568155e-06
+acc :  1.0
+accuracy_score :  1.0
+걸린 시간 :  194.09 sec
 
+Epoch 00062: early stopping
+------------------ keras47_rps_ImageDataGenerator3 --------------------
+52/52 [==============================] - 1s 13ms/step - loss: 3.7478e-07 - acc: 1.0000
+loss :  3.747774144358118e-07
+acc :  1.0
+accuracy_score :  1.0
+걸린 시간 :  263.51 sec
 
 '''

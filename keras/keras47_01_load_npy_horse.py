@@ -1,11 +1,9 @@
 '''
-2026-09-18 (금)
+2026-09-21 (월)
 
-45_3 카피
 
-할 때 마다 데이터를 변환하는게 메모리, 시간 소모가 많다.
-그래서 save 파일을 load 해보자.
 '''
+
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 
@@ -17,33 +15,47 @@ import time
 
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 
-np_path = './_data/save_kaggle_cat_dog_npy/'
+np_path = './_data/save_horse-human_npy/'
 
 
-x_train = np.load(np_path + 'keras45_03_x_train.npy') 
-y_train = np.load(np_path + 'keras45_03_y_train.npy') 
-x_test = np.load(np_path + 'keras45_03_x_test.npy')
-y_test = np.load(np_path + 'keras45_03_y_test.npy')
+x_train = np.load(np_path + 'keras46_01_x_train.npy') 
+y_train = np.load(np_path + 'keras46_01_y_train.npy') 
+x_test = np.load(np_path + 'keras46_01_x_test.npy')
+y_test = np.load(np_path + 'keras46_01_y_test.npy')
 
-# print(x_train.shape, y_train.shape) # (8005, 150, 150, 3) (8005,)
-# print(x_test.shape, y_test.shape)   # (2023, 150, 150, 3) (2023,)
+# print(x_train.shape, y_train.shape) # (821, 300, 300, 3) (821,)
+# print(x_test.shape, y_test.shape)   # (206, 300, 300, 3) (206,)
 
 # exit()
 
 #2. 모델구성 (유닛 강화 및 Dropout 완화)
 model = Sequential()
-model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(200, 200, 3)))
+# 첫 번째 블록 (300x300)
+model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(300, 300, 3)))
 model.add(MaxPooling2D()) 
 model.add(Dropout(0.2))
 
-model.add(Conv2D(64, (7, 7), padding='same', activation='relu'))
+# 두 번째 블록 (150x150)
+model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+model.add(MaxPooling2D()) 
+model.add(Dropout(0.2))
+
+# 세 번째 블록 (75x75)
+model.add(Conv2D(128, (3, 3), padding='same', activation='relu'))
 model.add(MaxPooling2D()) 
 model.add(Dropout(0.3))
 
-model.add(Conv2D(128, (5, 5), padding='same', activation='relu'))
+# 네 번째 블록 (37x37) - 레이어 추가하여 해상도 정보 보존력 향상
+model.add(Conv2D(256, (3, 3), padding='same', activation='relu'))
 model.add(MaxPooling2D()) 
 model.add(Dropout(0.3))
 
+# 다섯 번째 블록 (18x18) - 특징을 좁은 해상도까지 충분히 축소
+model.add(Conv2D(512, (3, 3), padding='same', activation='relu'))
+model.add(MaxPooling2D()) 
+model.add(Dropout(0.4))
+
+# 글로벌 풀링 적용 (압축 전 해상도를 충분히 줄여 손실 감소)
 model.add(GlobalAveragePooling2D()) 
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
@@ -74,9 +86,9 @@ date = date.strftime("%m%d_%H%M")
 print(date)         # 2026-09-14 11:48:27.764409
 print(type(date))   # <class 'datetime.datetime'>
 
-path = './_save/keras45/'
+path = './_save/keras47/'
 filename = '{epoch:04d}-{val_loss:.4f}.keras'
-filepath = "".join([path, 'IDG3_CatDog_', date, "-",filename])
+filepath = "".join([path, 'horse', date, "-",filename])
 
 #★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
 
@@ -92,7 +104,7 @@ start_time = time.time()
 
 model.fit(x_train, y_train,
           epochs = 300,
-          batch_size = 8,
+          batch_size = 32,
           verbose = 1,
           validation_split = 0.2,
           callbacks=[es, mcp],
@@ -100,15 +112,12 @@ model.fit(x_train, y_train,
 
 end_time = time.time()
 
-path = './_save/keras45/'
-# model.save(path + 'keras29_1_save_model.keras')
-model.save_weights(path + 'keras45_save_1.weights.h5')
 
 #4. 평가, 예측
-print("------------------ keras45_CatDog_load --------------------")
+print("------------------ keras47_horse-human_load --------------------")
 loss = model.evaluate(x_test, y_test, 
                       verbose = 1,
-                      batch_size = 32,
+                      batch_size = 8,
 )
 print('loss : ', loss[0])
 print('acc : ', loss[1])
@@ -122,17 +131,27 @@ print('accuracy_score : ', acc_score)
 print('걸린 시간 : ', round(end_time - start_time, 2),'sec')
 
 '''
-Epoch 00088: early stopping
------------------- keras45_CatDog_load --------------------
-253/253 [==============================] - 1s 2ms/step - loss: 0.4067 - acc: 0.8265
-loss :  0.4066929221153259
-acc :  0.8264952898025513
-accuracy_score :  0.8264953040039545
-걸린 시간 :  571.14 sec
+Epoch 00055: early stopping
+------------------ keras46_horse-human --------------------
+26/26 [==============================] - 0s 15ms/step - loss: 0.0304 - acc: 0.9903
+loss :  0.03043726645410061
+acc :  0.9902912378311157
+accuracy_score :  0.9902912621359223
+걸린 시간 :  118.75 sec
 
------------------- keras45_CatDog_load --------------------
-253/253 [==============================] - 1s 5ms/step - loss: 0.3711 - acc: 0.8626
-loss :  0.37105846405029297
-acc :  0.8625802993774414
+Epoch 00070: early stopping
+------------------ keras47_horse-human_load --------------------
+26/26 [==============================] - 0s 18ms/step - loss: 0.0076 - acc: 0.9951
+loss :  0.007632194086909294
+acc :  0.9951456189155579
+accuracy_score :  0.9951456310679612
+걸린 시간 :  149.9 sec
 
+Epoch 00073: early stopping
+------------------ keras47_horse-human_load --------------------
+26/26 [==============================] - 1s 19ms/step - loss: 0.0159 - acc: 0.9903
+loss :  0.015862850472331047
+acc :  0.9902912378311157
+accuracy_score :  0.9902912621359223
+걸린 시간 :  158.68 sec
 '''

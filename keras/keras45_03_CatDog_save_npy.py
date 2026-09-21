@@ -43,7 +43,7 @@ path_test = './_data/image/cat_dog/test_set/'
 
 xy_train = train_datagen.flow_from_directory(
     path_train,                      # 경로
-    target_size = (150, 150),
+    target_size = (200, 200),
     batch_size = 8005,
     class_mode = 'binary',           # 이진분류
     color_mode = 'rgb',         # 컬러
@@ -54,7 +54,7 @@ xy_train = train_datagen.flow_from_directory(
 
 xy_test = test_datagen.flow_from_directory(
     path_test,                        # 경로
-    target_size = (150, 150),
+    target_size = (200, 200),
     batch_size = 3000,
     class_mode = 'binary',            # 이진분류
     color_mode = 'rgb',         # 컬러
@@ -88,16 +88,17 @@ np.save(np_path + 'keras45_03_y_train.npy', arr = xy_train[0][1]) # y_train
 np.save(np_path + 'keras45_03_x_test.npy', arr = xy_test[0][0]) # x_test
 np.save(np_path + 'keras45_03_y_test.npy', arr = xy_test[0][1]) # y_test
 
-exit()
+# exit()
+
 #2. 모델구성
 
 #2. 모델구성 (유닛 강화 및 Dropout 완화)
 model = Sequential()
-model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(150, 150, 3)))
+model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(200, 200, 3)))
 model.add(MaxPooling2D()) 
 model.add(Dropout(0.2))
 
-model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+model.add(Conv2D(64, (5, 5), padding='same', activation='relu'))
 model.add(MaxPooling2D()) 
 model.add(Dropout(0.3))
 
@@ -161,9 +162,12 @@ model.fit(x_train, y_train,
 
 end_time = time.time()
 
+path = './_save/keras45/'
+# model.save(path + 'keras29_1_save_model.keras')
+model.save_weights(path + 'keras45_save_1.weights.h5')
 
 #4. 평가, 예측
-print("------------------ keras44_CatDog_ImageDataGenerator3 --------------------")
+print("------------------ keras45_CatDog_ImageDataGenerator3 --------------------")
 loss = model.evaluate(x_test, y_test, 
                       verbose = 1,
                       batch_size = 8,
