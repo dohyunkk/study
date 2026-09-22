@@ -188,6 +188,8 @@ acc_score = accuracy_score(y_test, y_predict)
 print('accuracy_score : ', acc_score)
 print('걸린 시간 : ', round(end_time - start_time, 2),'sec')
 
+
+
 '''
 Epoch 00055: early stopping
 ------------------ keras46_horse-human --------------------

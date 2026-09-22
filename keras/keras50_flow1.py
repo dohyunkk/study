@@ -2,6 +2,8 @@
 2026-09-21 (월)
 
 세이브 한 데이터를 증폭해보자.
+
+폴더에 있는 이미지를 수치화 하는거,
 '''
 from tensorflow.keras.preprocessing.image import load_img
 from tensorflow.keras.preprocessing.image import img_to_array

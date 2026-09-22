@@ -17,6 +17,7 @@ from sklearn.metrics import accuracy_score
 # ----------------------------------------------------
 # 1. 데이터 로드 및 미니배치 스트리밍 설정 (제너레이터 자체 분할)
 # ----------------------------------------------------
+
 train_datagen = ImageDataGenerator(
     rescale = 1./255,
     validation_split = 0.2  # 8:2 비율로 내부 분할 선언
@@ -28,7 +29,7 @@ path_data = './_data/image/men-women/'
 train_generator = train_datagen.flow_from_directory(
     path_data,                      
     target_size = (150, 150),       
-    batch_size = 1000,                
+    batch_size = 30000,                
     class_mode = 'binary',           
     color_mode = 'rgb',         
     shuffle = True,
@@ -39,7 +40,7 @@ train_generator = train_datagen.flow_from_directory(
 test_generator = train_datagen.flow_from_directory(
     path_data,                      
     target_size = (150, 150),       
-    batch_size = 1000,                
+    batch_size = 30000,                
     class_mode = 'binary',           
     color_mode = 'rgb',         
     shuffle = False,                
