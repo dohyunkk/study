@@ -3,7 +3,7 @@
 keras30_1  카피
 
 #2. 모델구성
-Dropout
+Dropout / 과적합 방지
 '''
 
 import numpy as np
