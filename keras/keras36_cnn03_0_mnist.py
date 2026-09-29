@@ -81,7 +81,7 @@ model.add(Dense(10, activation='softmax'))                         # (10, )
 
 model.summary()
 
-# exit()
+exit()
 
 #3. 컴파일, 훈련
 model.compile(loss='categorical_crossentropy', optimizer = 'adam', 

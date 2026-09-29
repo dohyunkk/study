@@ -34,9 +34,9 @@ bbb = split_x(a, size)
 print(bbb)
 print(bbb.shape) # (6, 5)
 
-x = bbb[:, :-1]
+x = bbb[:, :-1]     # batch_size
 
-y = bbb[:, -1]
+y = bbb[:, -1]      # batch_size
 
 print('x : ')
 print(x)
@@ -82,6 +82,8 @@ model.fit(x, y,
 
 
 #4. 평가 예측
+print('------------keras56_split1_3_teacher----------------')
+
 results = model.evaluate(x, y)
 print('loss : ', results)
 

@@ -90,6 +90,8 @@ model.fit(x, y,
 
 
 #4. 평가 예측
+print('------------keras56_split1_2_gpt------------------')
+
 results = model.evaluate(x, y)
 print('loss : ', results)
 

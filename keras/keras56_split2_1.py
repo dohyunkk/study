@@ -34,3 +34,13 @@ bbb = split_x(a, size)
 
 # print(bbb.shape) # (8, 3, 2)
 
+x = bbb[:, :-1, :]                 # batch_size
+# x = bbb[:, :-1]
+
+y = bbb[:, -1, 0]                  # batch_size  
+# y = bbb[:, -1, -1]
+
+print('x : ')
+print(x)
+print('y : ')
+print(y)
