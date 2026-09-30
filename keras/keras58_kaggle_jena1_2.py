@@ -43,7 +43,7 @@ print('datasets.shape :', datasets.shape)
 # 마지막 144개의 wd(풍향)
 # ------------------------------------------------------------
 
-y_cor = datasets[-144:]['wd (deg)']
+y_cor = datasets[-144:]['T (degC)']
 
 print('y_cor.shape :', y_cor.shape)
 # (144,)
@@ -55,7 +55,7 @@ print('y_cor.shape :', y_cor.shape)
 # ------------------------------------------------------------
 
 x_predict = datasets[-288:-144].drop(
-    ['wd (deg)'],
+    ['T (degC)'],
     axis=1
 )
 
@@ -72,12 +72,12 @@ start_time = time.time()
 
 # x : 현재 144개 데이터를 사용
 x_data = datasets[:-288].drop(
-    ['wd (deg)'],
+    ['T (degC)'],
     axis=1
 )
 
 # y : x보다 144칸 뒤의 wd
-y_data = datasets[144:-144]['wd (deg)']
+y_data = datasets[144:-144]['T (degC)']
 
 
 print('x_data.shape :', x_data.shape)
@@ -138,7 +138,7 @@ x_train, x_test, y_train, y_test = train_test_split(
 )
 
 
-print('\n===== train / test =====')
+print('===== train / test =====')
 
 print('x_train.shape :', x_train.shape)
 print('x_test.shape  :', x_test.shape)
@@ -257,12 +257,8 @@ print('x_predict.shape :', x_predict.shape)
 model = Sequential()
 
 model.add(LSTM(units=32, input_shape=(144, 13), return_sequences=True))
-
 model.add(LSTM(units=32, return_sequences=True))
-
 model.add(Dense(32, activation='relu'))
-
-# 각 timestep마다 풍향 1개씩 출력
 model.add(Dense(1))
 
 
@@ -305,7 +301,6 @@ model.fit(
     x_train,y_train,
     epochs=1000,
     batch_size=32,
-    validation_split=0.1,
     shuffle=False,
     verbose=1,
     callbacks=[es, rlr]

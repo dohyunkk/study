@@ -29,18 +29,21 @@ datasets = pd.read_csv(path + 'jena_climate_2009_2016.csv', index_col=0)
 
 # print(datasets.shape) # (420551, 14)
 
-y_cor = datasets[-144:]['wd (deg)'] # 예측치 정답 데이터
+# 수정 : T (degC) < 이놈을 y로 잡는다.
+
+y_cor = datasets[-144:]['T (degC)'] # 예측치 정답 데이터
 # print(y_cor.shape)      # (144,)
+
 
 
 #### 훈련할 데이터 자르기 ####
 start_time = time.time()
 
-x_data = datasets[:-288].drop(['wd (deg)'], axis=1)
-y_data = datasets[144:-144]['wd (deg)']
+x_data = datasets[:-288].drop(['T (degC)'], axis=1).to_numpy(dtype=np.float32)
+y_data = datasets[144:-144]['T (degC)'].to_numpy(dtype=np.float32)
 
 print(x_data.shape)      # (420263, 13)
-print(y_data.shape)      # (420263,)
+print(y_data.shape)      # (420263),)
 
 size_x = 144
 size_y = 144

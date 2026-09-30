@@ -1,0 +1,15 @@
+RAG
+
+cmd에서 가상환경 만들기
+
+C:\Users\Admin>conda env list
+
+C:\Users\Admin>conda create -n langchain python=3.11
+
+C:\Users\Admin>activate langchain
+
+(langchain)C:\Users\Admin>pip install langchain
+
+(langchain)C:\Users\Admin>pip install langchain_openai
+
+(langchain) C:\Users\Admin>pip install dotenv

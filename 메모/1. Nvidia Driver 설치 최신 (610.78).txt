@@ -1,0 +1,48 @@
+1. Nvidia Driver 설치 최신 (610.78) >>> (616.92)
+
+2. Cuda 설치 11.2.2
+
+3. Cudnn 설치 8.1.1 for CUDA 11.0, 11.1 and 11.2
+
+4. 가상환경추가  (tf29x-gpu)
+conda create -n tf29x-gpu python-3.10
+
+5. python 3.10.x
+
+6. Tensorflow 2.9.x
+
+7. scikit-learn 1.7.2
+
+------------------------------
+cmd에서
+
+nvidia-smi
+nvcc -V
+
+conda create -n tf29x-gpu python=3.10      가상환경 생성
+
+activate tf29x-gpu                                    가상환경 입장
+
+pip install tensorflow-gpu==2.9.3                가상환경 안에서 설치
+
+pip uninstall numpy                              넘파이 삭제
+
+pip install numpy==1.26.4                      넘파이 1.26.4 설치
+
+pip install scikit-learn==1.7.2
+---------------------------------------
+＃donwload
+
+-nvida drivers
+https://www.nvidia.com/ko-kr/drivers/
+
+
+-cuda toolkit download
+https://developer.nvidia.com/cuda-downloads에서 
+Archive of Previous CUDA Releases 찾아 누르기 그러면
+https://developer.nvidia.com/cuda-toolkit-archive 나옴
+11.2.2 찾아서 설치
+
+-cudnn download 검색
+Archive 찾아서 누르기
+Download cuDNN v8.1.1 (Feburary 26th, 2021), for CUDA 11.0,11.1 and 11.2
