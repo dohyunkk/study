@@ -142,6 +142,8 @@ mcp = ModelCheckpoint(
     verbose = 1,
 )
 
+start_fit = time.time()
+
 model.fit(
     x_train,y_train,
     epochs=1000,
@@ -151,6 +153,8 @@ model.fit(
     validation_split=0.2,
     callbacks=[es, rlr, mcp]
 )
+
+end_fit = time.time()
 
 print('test loss:', model.evaluate(x_test, y_test))
 
@@ -166,3 +170,4 @@ rmse = np.sqrt(mean_squared_error(y_cor.to_numpy(), y_predict))
 print('실제 기온:', y_cor.to_numpy())
 print('예측 기온:', y_predict)
 print('RMSE (°C):', rmse)
+print('훈련 시간 : ', round(end_fit - start_fit, 2),'sec')
