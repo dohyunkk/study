@@ -84,8 +84,7 @@ print('x_train, y_train:', x_train.shape, y_train.shape)
 
 # 4. 모델
 model = Sequential()
-model.add(LSTM(units=32, input_shape=(144, 13), return_sequences=True))
-model.add(LSTM(units=32))
+model.add(LSTM(units=32, input_shape=(144, 13)))
 model.add(Dense(64, activation='relu'))
 model.add(Dense(144))
 
@@ -104,19 +103,19 @@ model.compile(
 es = EarlyStopping(
     monitor='val_loss',
     mode='min',
-    patience=20,
+    patience=3,
     verbose=1,
     restore_best_weights=True
 )
 
 
-rlr = ReduceLROnPlateau(
-    monitor='val_loss',
-    mode='min',
-    patience=10,
-    factor=0.5,
-    verbose=1
-)
+# rlr = ReduceLROnPlateau(
+#     monitor='val_loss',
+#     mode='min',
+#     patience=5,
+#     factor=0.5,
+#     verbose=1
+# )
 
 #★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 import datetime
@@ -151,7 +150,7 @@ model.fit(
     shuffle=False,
     verbose=1,
     validation_split=0.2,
-    callbacks=[es, rlr, mcp]
+    callbacks=[es, mcp]
 )
 
 end_fit = time.time()
