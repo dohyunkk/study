@@ -65,7 +65,7 @@ print(np.min(x_test), np.max(x_test))     # 0.0 1.0
 from tensorflow.keras.layers import Reshape, LSTM
 
 model = Sequential()
-model.add(Reshape(target_shape=(28, 28, 1), input_shape=(28, 28))) # (N, 28, 28, 10)
+model.add(Reshape(target_shape=(28, 28, 1), input_shape=(28, 28))) # (N, 28, 28, 1)
 
 model.add(Conv2D(128, (3, 3), padding='same', activation='relu')) # (28, 28, 128)
 model.add(MaxPooling2D())
@@ -152,5 +152,14 @@ loss :  0.01604430191218853
 acc :  0.9955999851226807
 accuracy_score :  0.9956
 걸린 시간 :  127.88 sec
+
+Epoch 69: early stopping
+------------------ 65_Reshape2_model.evaluate --------------------
+313/313 [==============================] - 1s 2ms/step - loss: 0.0410 - acc: 0.9885
+loss :  0.040968045592308044
+acc :  0.9884999990463257
+313/313 [==============================] - 1s 2ms/step
+accuracy_score :  0.9885
+걸린 시간 :  231.95 sec
 
 '''
