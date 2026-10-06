@@ -39,4 +39,4 @@ embeddings = OpenAIEmbeddings(
 vector = embeddings.embed_query(prompt)
 print(vector)                                      # 숫자 5개짜리 리스트
 print('==============================')
-print('임베딩 벡터의 차원: ', len(vector)) # dimensions 조절 가능 -> 임베딩 벡터의 차원:  5
+print('임베딩 벡터의 차원: ', len(vector))          # dimensions 조절 가능 -> 임베딩 벡터의 차원:  5

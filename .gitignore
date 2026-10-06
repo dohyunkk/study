@@ -2,3 +2,4 @@ _data/
 _save/
 .vscode/
 .env
+_db/
