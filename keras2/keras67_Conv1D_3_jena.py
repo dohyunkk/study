@@ -13,7 +13,8 @@ import time
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from tensorflow.keras.layers import Dense, LSTM, Conv1D, Flatten, GlobalAveragePooling1D, Dropout
+from tensorflow.keras.layers import Dense, LSTM, Conv1D, Flatten
+from tensorflow.keras.layers import GlobalAveragePooling1D, Dropout, Maxpooling1D
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
@@ -103,8 +104,6 @@ model.add(Dense(144))
 model.summary()
 
 # exit()
-
-
 
 
 # 컴파일, 훈련

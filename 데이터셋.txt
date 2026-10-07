@@ -21,3 +21,6 @@
 13 cifar10
 14 cifar100
 15 man_woman
+
+회귀 / 시계열
+16 kaggle_jena

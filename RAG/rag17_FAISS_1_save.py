@@ -1,5 +1,6 @@
 '''
-2026-10-06
+11_1 카피
+
 '''
 
 import os
@@ -9,6 +10,11 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
+
+# pip install faiss-cpu
+import faiss
+from langchain_community.vectorstores import FAISS
+from langchain_community.docstore.in_memory import InMemoryDocstore
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -44,18 +50,39 @@ embeddings = OpenAIEmbeddings(
     model = 'text-embedding-3-small',
     api_key=api_key,
     base_url=base_url,
-    # dimensions=5,                                  # 출력 벡터 차원을 5 로 지정 (text-embedding-3 계열 모델에서만 사용 가능)
+    # dimensions=5,                  # 1536
 )
 
-DB_PATH = './_db/Chroma11/'
+# FAISS를 해보자.#############################
+faiss_index = faiss.IndexFlatL2(len(embeddings.embed_query("hello world")))
+# faiss_index = faiss.IndexFlatL2(1536)
+print("FAISS 인덱스 초기화 준비 완료")
 
-# 03. 저장
-db = Chroma.from_documents(
+# FAISS 벡터 저장소의 벡터 차원 수 (임베딩 차원 수)
+print(faiss_index.d)                 # 1536
+
+faiss_db = FAISS(
+    embedding_function=embeddings,
+    index = faiss_index,
+    docstore=InMemoryDocstore(),
+    index_to_docstore_id={},
+)
+
+# 저장된 문서의 갯수 확인.
+print(faiss_db.index.ntotal)         # 0
+
+# 준비완료 ####################################
+###############################################
+
+db = FAISS.from_documents(
     documents=split_doc1 + split_doc2,
     embedding=embeddings,
-    persist_directory=DB_PATH,
-    collection_name='chroma11',
+)
+DB_PATH = './_db/Faiss17'
+db.save_local(
+    folder_path = DB_PATH,
+    index_name='faiss_index17'
 )
 
-print("Chroma 문서저장 끝")
+
 
