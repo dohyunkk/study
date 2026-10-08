@@ -1,6 +1,17 @@
+'''
+2026-10-08
+
+맹그로바
+'''
+
+'''
+19-1 카피
+
+'''
+
 import os
 
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader, PyPDFLoader
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
 from langchain_chroma import Chroma
@@ -19,27 +30,35 @@ base_url = 'https://monogpt.kr/api/monorouter/v1'
 
 
 #03. 임베딩
-from langchain_openai import OpenAIEmbeddings
-embeddings = OpenAIEmbeddings(
-    model = 'text-embedding-3-small',
-    api_key=api_key,
-    base_url=base_url,
-    # dimensions=5,                  # 1536
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+import sentence_transformers
+
+embeddings = HuggingFaceEmbeddings(
+    model_name = "Qwen/Qwen3-Embedding-0.6B",
+    model_kwargs ={
+        "device" : "cpu",
+        "local_files_only" : True
+    } 
 )
 
 
-DB_PATH = './_db/Faiss17'
+DB_PATH = './_db/Faiss20'
+# db.save_local(
+#     folder_path = DB_PATH,
+#     index_name='faiss_index17'
+# )
 
-# ========================================
-# 불러오기
-# ========================================
 db = FAISS.load_local(
     folder_path=DB_PATH,
-    index_name='faiss_index17',
+    index_name='20qwen_pdf',
     embeddings=embeddings,
     allow_dangerous_deserialization=True,
 )
 
+print(f"저장된 문서 수 : {len(db.index_to_docstore_id)}")
+
+
+# exit()
 ########################### retrievers ############################
 ######################## 검색기(자료찾기) #########################
 
@@ -88,7 +107,10 @@ def answer_invoke(message, history):
     return response['answer']
 
 # gradio 인터페이스 만들자
-demo = gr.ChatInterface(fn=answer_invoke, title='드가자!!')
+demo = gr.ChatInterface(fn=answer_invoke, title='슛!!')
 
 # gradio 실행
 demo.launch()
+
+
+

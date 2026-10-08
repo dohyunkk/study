@@ -1,6 +1,11 @@
+'''
+19-1 카피
+
+'''
+
 import os
 
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader, PyPDFLoader
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
 from langchain_chroma import Chroma
@@ -28,18 +33,23 @@ embeddings = OpenAIEmbeddings(
 )
 
 
-DB_PATH = './_db/Faiss17'
+DB_PATH = './_db/Faiss19'
+# db.save_local(
+#     folder_path = DB_PATH,
+#     index_name='faiss_index17'
+# )
 
-# ========================================
-# 불러오기
-# ========================================
 db = FAISS.load_local(
     folder_path=DB_PATH,
-    index_name='faiss_index17',
+    index_name='faiss_pdf',
     embeddings=embeddings,
     allow_dangerous_deserialization=True,
 )
 
+print(f"저장된 문서 수 : {len(db.index_to_docstore_id)}")
+
+
+# exit()
 ########################### retrievers ############################
 ######################## 검색기(자료찾기) #########################
 
@@ -88,7 +98,7 @@ def answer_invoke(message, history):
     return response['answer']
 
 # gradio 인터페이스 만들자
-demo = gr.ChatInterface(fn=answer_invoke, title='드가자!!')
+demo = gr.ChatInterface(fn=answer_invoke, title='슛!!')
 
 # gradio 실행
 demo.launch()
