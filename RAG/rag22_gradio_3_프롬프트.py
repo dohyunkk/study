@@ -5,6 +5,8 @@
 이터레이터는 포문(반복문)이다
 
 벡터디비의 검색기의 유사도 부분을 건드려보자.
+
+모델과 프롬프트와 리트리버가 중요
 '''
 
 import os
@@ -63,8 +65,8 @@ print(f"저장된 문서 수 : {len(db.index_to_docstore_id)}")
 retriever = db.as_retriever(
     search_type="similarity_score_threshold",
     search_kwargs={
-        "k":4,                    #* 청킹을 2개
-        "score_threshold": 0.7,    #* 유사도가 0.7 이하일 경우 검색에서 제외
+        "k":4,                      #* 청킹을 2개
+        "score_threshold": 0.7,     #* 유사도가 0.7 이하일 경우 검색에서 제외
         }
 )
 

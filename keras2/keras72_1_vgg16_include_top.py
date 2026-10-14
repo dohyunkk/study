@@ -1,6 +1,12 @@
-
+'''
 #! VGG16 등장
 
+#* include_top=True,          #
+#* input_shape=(224,224,3),   # vgg16이 나왔던 대회의 원 이미지 쉐이프
+
+#* include_top=False,
+#* input_shape=(100,100,3),
+'''
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense

@@ -1,0 +1,11 @@
+전이학습 : Transfer Learning
+
+Feature Extraction
+ - 사전 학습된 모델을 고정된 특징 추출기로 활용
+
+Pre-trained Model
+사전 학습 모델
+
+사전학습 모델 기반의 파인 튜닝(Fine-tuning)
+
+어쩌구 저쩌구... 이제 위에 용어들이 뭔 말인지 알것조?
