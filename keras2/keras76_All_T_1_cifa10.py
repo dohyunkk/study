@@ -57,11 +57,11 @@ for model_i in model_list:
     model.add(Dense(32))
     model.add(Dense(16))
     # model.add(Dense(10, activation='softmax'))
-    model.add(Dense(100, activation='softmax'))
+    model.add(Dense(10, activation='softmax'))
 
 
-    # (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-    (x_train, y_train), (x_test, y_test) = cifar100.load_data()
+    (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+    # (x_train, y_train), (x_test, y_test) = cifar100.load_data()
 
 
     #* 스케일링
