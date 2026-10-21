@@ -1,25 +1,26 @@
-'''
+"""
 2026-10-08
 
 앞에 수업까진 txt 파일을 땡겨왔고, 이번엔 PDF를 땡겨보자.
-'''
+"""
+
 import os
 
-from langchain_community.document_loaders import TextLoader, PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-
 from dotenv import load_dotenv
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 load_dotenv()
 
-api_key = os.environ['MONOROUTER_API_KEY'].strip()
-base_url = 'https://monogpt.kr/api/monorouter/v1'
+api_key = os.environ["MONOROUTER_API_KEY"].strip()
+base_url = "https://monogpt.kr/api/monorouter/v1"
 
 # =========================================
 # 1. 데이터(pdf) 가져오기
-path = './_data/'
-pdf_loader = PyPDFLoader(path + 'attention is all you need.pdf')
+path = "./_data/"
+pdf_loader = PyPDFLoader(path + "attention is all you need.pdf")
 pdf_docs = pdf_loader.load()
 
 # 문서 개수 확인

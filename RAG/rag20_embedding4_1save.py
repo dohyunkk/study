@@ -1,20 +1,20 @@
 import os
 
-from langchain_community.document_loaders import TextLoader, PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-
 from dotenv import load_dotenv
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 load_dotenv()
 
-api_key = os.environ['MONOROUTER_API_KEY'].strip()
-base_url = 'https://monogpt.kr/api/monorouter/v1'
+api_key = os.environ["MONOROUTER_API_KEY"].strip()
+base_url = "https://monogpt.kr/api/monorouter/v1"
 
 # =========================================
 # 1. 데이터(pdf) 가져오기
-path = './_data/'
-pdf_loader = PyPDFLoader(path + 'attention is all you need.pdf')
+path = "./_data/"
+pdf_loader = PyPDFLoader(path + "attention is all you need.pdf")
 pdf_docs = pdf_loader.load()
 
 # 문서 개수 확인
@@ -38,23 +38,21 @@ split_docs = splitter.split_documents(pdf_docs)
 
 # =========================================
 # 3. 임베딩
-from langchain_huggingface.embeddings import HuggingFaceEmbeddings
-import sentence_transformers
 
 # embeddings = HuggingFaceEmbeddings(
 #     model_name = 'BAAI/bge-m3',
 #     model_kwargs ={
 #         "device" : "cpu",
 #         # "local_files_only" : True
-#     } 
+#     }
 # )
 
 embeddings = HuggingFaceEmbeddings(
-    model_name = "Qwen/Qwen3-Embedding-0.6B",
-    model_kwargs ={
-        "device" : "cpu",
+    model_name="Qwen/Qwen3-Embedding-0.6B",
+    model_kwargs={
+        "device": "cpu",
         # "local_files_only" : True
-    } 
+    },
 )
 
 # =========================================

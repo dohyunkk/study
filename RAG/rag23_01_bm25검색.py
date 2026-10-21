@@ -1,3 +1,4 @@
+from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 
 texts = [
@@ -11,29 +12,27 @@ texts = [
     Document(page_content="반도체는 컴퓨터의 핵심 부품이다."),
 ]
 
-query = '삼성전자의 반도체 사업'
+query = "삼성전자의 반도체 사업"
 
-#*################ BM25 검색 #########################
+# *################ BM25 검색 #########################
 # BM25는 키워드 기반 검색. (Best Match 25)
-from langchain_community.retrievers import BM25Retriever
 
 bm25_retriever = BM25Retriever.from_documents(texts)
 bm25_retriever.k = 3
 
 bm25_docs = bm25_retriever.invoke(query)
 
-#? activate langchain
-#? pip install rank_bm25
-print('================== BM25 검색 결과 =====================')
+# ? activate langchain
+# ? pip install rank_bm25
+print("================== BM25 검색 결과 =====================")
 for doc in bm25_docs:
     print(doc.page_content)
 
 
-
-'''
+"""
 ================== BM25 검색 결과 =====================
 삼성전자는 AI 반도체 기술을 연구한다.
 반도체는 컴퓨터의 핵심 부품이다.
 테슬라는 전기자동차를 제조한다.
 
-'''
+"""

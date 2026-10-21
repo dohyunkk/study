@@ -1,24 +1,20 @@
-'''
+"""
 2026-09-22 (화)
 
 !! 실습 만들어보기.
 !! 목표 acc : 성능개선
-'''
+"""
 
-import numpy as np
-import matplotlib.pyplot as plt
 import time
 
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout
-from tensorflow.keras.layers import MaxPooling2D
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.datasets import mnist
-
+import numpy as np
 from sklearn.metrics import accuracy_score
-
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.utils import to_categorical
 
 # ============================================================
 # 1. 데이터
@@ -32,42 +28,31 @@ from sklearn.metrics import accuracy_score
 # ============================================================
 
 datagen = ImageDataGenerator(
-    rescale=1./255,
+    rescale=1.0 / 255,
     horizontal_flip=False,
     height_shift_range=0.1,
     width_shift_range=0.1,
     rotation_range=10,
-    fill_mode='nearest'
+    fill_mode="nearest",
 )
 
 augment_size = 40000
 
 
 # 60,000개 중 랜덤하게 40,000개 선택
-randidx = np.random.randint(
-    x_train.shape[0],
-    size=augment_size
-)
+randidx = np.random.randint(x_train.shape[0], size=augment_size)
 
 x_augmented = x_train[randidx].copy()
 y_augmented = y_train[randidx].copy()
 
 
 # CNN 입력 형태로 변경
-x_augmented = x_augmented.reshape(
-    x_augmented.shape[0],
-    28,
-    28,
-    1
-)
+x_augmented = x_augmented.reshape(x_augmented.shape[0], 28, 28, 1)
 
 
 # 데이터 증강
 generator = datagen.flow(
-    x_augmented,
-    y_augmented,
-    batch_size=augment_size,
-    shuffle=False
+    x_augmented, y_augmented, batch_size=augment_size, shuffle=False
 )
 
 x_augmented = next(generator)[0]
@@ -91,15 +76,9 @@ x_test = x_test / 255.0
 # 4. 원본 + 증강 데이터 합치기
 # ============================================================
 
-x_train = np.concatenate(
-    (x_train, x_augmented),
-    axis=0
-)
+x_train = np.concatenate((x_train, x_augmented), axis=0)
 
-y_train = np.concatenate(
-    (y_train, y_augmented),
-    axis=0
-)
+y_train = np.concatenate((y_train, y_augmented), axis=0)
 
 
 print()
@@ -130,22 +109,24 @@ y_test = to_categorical(y_test, 10)
 model = Sequential()
 
 # 블록 1
-model.add(Conv2D(32, (3, 3), padding='same', input_shape=(28, 28, 1), activation='relu'))
-model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
+model.add(
+    Conv2D(32, (3, 3), padding="same", input_shape=(28, 28, 1), activation="relu")
+)
+model.add(Conv2D(32, (3, 3), padding="same", activation="relu"))
 model.add(MaxPooling2D())
 model.add(Dropout(0.25))
 
 # 블록 2
-model.add(Conv2D(64, (3, 3), padding='same', strides=(2, 2), activation='relu'))
-model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+model.add(Conv2D(64, (3, 3), padding="same", strides=(2, 2), activation="relu"))
+model.add(Conv2D(64, (3, 3), padding="same", activation="relu"))
 model.add(MaxPooling2D())
 model.add(Dropout(0.25))
 
 # Fully Connected
 model.add(Flatten())
-model.add(Dense(128, activation='relu'))
+model.add(Dense(128, activation="relu"))
 model.add(Dropout(0.3))
-model.add(Dense(10, activation='softmax'))
+model.add(Dense(10, activation="softmax"))
 
 model.summary()
 
@@ -154,11 +135,7 @@ model.summary()
 # 7. 컴파일
 # ============================================================
 
-model.compile(
-    loss='categorical_crossentropy',
-    optimizer='adam',
-    metrics=['acc']
-)
+model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["acc"])
 
 
 # ============================================================
@@ -166,11 +143,7 @@ model.compile(
 # ============================================================
 
 es = EarlyStopping(
-    monitor='val_loss',
-    mode='min',
-    patience=20,
-    restore_best_weights=True,
-    verbose=1
+    monitor="val_loss", mode="min", patience=20, restore_best_weights=True, verbose=1
 )
 
 
@@ -188,7 +161,7 @@ history = model.fit(
     batch_size=128,
     verbose=1,
     validation_split=0.2,
-    callbacks=[es]
+    callbacks=[es],
 )
 
 
@@ -205,11 +178,7 @@ print("MNIST MODEL EVALUATE")
 print("==========================================")
 
 
-loss = model.evaluate(
-    x_test,
-    y_test,
-    verbose=1
-)
+loss = model.evaluate(x_test, y_test, verbose=1)
 
 
 print()
@@ -221,31 +190,20 @@ print("acc  :", loss[1])
 # 11. 예측
 # ============================================================
 
-y_predict = model.predict(
-    x_test
-)
+y_predict = model.predict(x_test)
 
 
 # 확률값 → 실제 숫자
-y_predict = np.argmax(
-    y_predict,
-    axis=1
-)
+y_predict = np.argmax(y_predict, axis=1)
 
-y_test = np.argmax(
-    y_test,
-    axis=1
-)
+y_test = np.argmax(y_test, axis=1)
 
 
 # ============================================================
 # 12. Accuracy Score
 # ============================================================
 
-acc_score = accuracy_score(
-    y_test,
-    y_predict
-)
+acc_score = accuracy_score(y_test, y_predict)
 
 
 print()
@@ -258,7 +216,7 @@ print("accuracy_score :", acc_score)
 
 print("걸린 시간 :", round(end_time - start_time, 2), "sec")
 
-'''
+"""
 Epoch 00038: early stopping
 ------------------ 51_fashion_model.evaluate --------------------
 313/313 [==============================] - 0s 2ms/step - loss: 0.2118 - acc: 0.9263
@@ -267,4 +225,4 @@ acc  : 0.9262999892234802
 accuracy_score : 0.9263
 걸린 시간 : 101.63 sec
 
-'''
+"""

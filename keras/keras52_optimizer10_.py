@@ -1,4 +1,4 @@
-'''
+"""
 2026-09-23 (수)
 
 28 카피
@@ -17,20 +17,22 @@ learning_rate = 0.005
 # learning_rate = 0.009
 
 optimizer=Adam(learning_rate=learning_rate)
-'''
+"""
+
+import time
 
 import numpy as np
 import pandas as pd
-import time
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping
-from sklearn.metrics import accuracy_score
-
 from sklearn.datasets import load_digits
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import Adam
 
-#1. 데이터
+# 1. 데이터
 datasets = load_digits()
 
 # print(datasets)
@@ -40,7 +42,7 @@ datasets = load_digits()
 # print(datasets.feature_names)
 
 x = datasets.data
-y = datasets['target']
+y = datasets["target"]
 
 # print(x.shape, y.shape)
 # (1797, 64) (1797,)
@@ -64,11 +66,12 @@ y = pd.get_dummies(y, dtype=int)
 # [1797 rows x 10 columns]
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.8,
-    random_state = 52525,
-    stratify = y,
-    shuffle = True,
+    x,
+    y,
+    train_size=0.8,
+    random_state=52525,
+    stratify=y,
+    shuffle=True,
 )
 
 
@@ -77,7 +80,6 @@ x_train, x_test, y_train, y_test = train_test_split(
 # print(y_train.shape, y_test.shape)
 # (1257, 10) (540, 10)
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler,RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -94,26 +96,25 @@ print(x_train)
 print(x_test)
 
 print(np.min(x_train), np.max(x_train))
-# 
+#
 print(np.min(x_test), np.max(x_test))
-# 
+#
 
 # exit()
 
-#2. 모델
+# 2. 모델
 
 model = Sequential()
-model.add(Dense(640, input_shape = (64,), activation = 'relu'))
-model.add(Dense(320, activation = 'relu'))
-model.add(Dense(504, activation = 'relu'))
-model.add(Dense(700, activation = 'relu'))
-model.add(Dense(350, activation = 'relu'))
-model.add(Dense(130, activation = 'relu'))
-model.add(Dense(10, activation = 'softmax'))
+model.add(Dense(640, input_shape=(64,), activation="relu"))
+model.add(Dense(320, activation="relu"))
+model.add(Dense(504, activation="relu"))
+model.add(Dense(700, activation="relu"))
+model.add(Dense(350, activation="relu"))
+model.add(Dense(130, activation="relu"))
+model.add(Dense(10, activation="softmax"))
 
 
-#3. 컴파일, 훈련
-from tensorflow.keras.optimizers import Adam
+# 3. 컴파일, 훈련
 
 # learning_rate = 0.01
 # learning_rate = 0.001   # 디폴트값
@@ -122,37 +123,40 @@ learning_rate = 0.005
 # learning_rate = 0.05
 # learning_rate = 0.009
 
-model.compile(loss='categorical_crossentropy',
-              optimizer = Adam(learning_rate=learning_rate),
-              metrics=['acc'],
-              )
+model.compile(
+    loss="categorical_crossentropy",
+    optimizer=Adam(learning_rate=learning_rate),
+    metrics=["acc"],
+)
 
 es = EarlyStopping(
-    monitor = 'val_loss',
-    mode = 'auto',
-    patience = 50,
-    restore_best_weights = True,
+    monitor="val_loss",
+    mode="auto",
+    patience=50,
+    restore_best_weights=True,
 )
 
 start_time = time.time()
 
-model.fit(x_train, y_train,
-          epochs = 10000,
-          batch_size = 32,
-          verbose = 1,
-          validation_split = 0.3,
-          callbacks = [es],
-          )
+model.fit(
+    x_train,
+    y_train,
+    epochs=10000,
+    batch_size=32,
+    verbose=1,
+    validation_split=0.3,
+    callbacks=[es],
+)
 
 end_time = time.time()
 
-#.4 평가, 예측
+# .4 평가, 예측
 
 print("================ keras52_learning_rate_digits =======================")
 
 result = model.evaluate(x_test, y_test)
-print('loss : ', result[0])
-print('acc : ', round(result[1],2))
+print("loss : ", result[0])
+print("acc : ", round(result[1], 2))
 
 y_predict = model.predict(x_test)
 
@@ -173,10 +177,10 @@ y_test = np.argmax(y_test, axis=1)
 
 
 accuracy_score = accuracy_score(y_test, y_predict)
-print('acc_score : ', accuracy_score)
-print('걸린시간 : ', round(end_time - start_time, 2),'sec')
+print("acc_score : ", accuracy_score)
+print("걸린시간 : ", round(end_time - start_time, 2), "sec")
 
-'''
+"""
 minmaxscaler
 Epoch 59/10000
 32/32 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - acc: 1.0000 - loss: 3.5371e-07 - val_acc: 0.9676 - val_loss: 0.1815
@@ -198,4 +202,4 @@ acc :  0.96
 12/12 [==============================] - 0s 1ms/step
 acc_score :  0.9583333333333334
 걸린시간 :  7.33 sec
-'''
+"""

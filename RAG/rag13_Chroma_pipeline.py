@@ -1,22 +1,19 @@
-'''
+"""
 2026-10-07
 12-3 카피
 save 데이터를 불러와서 출력값 확인.
-'''
+"""
 
 import os
 
-from langchain_community.document_loaders import TextLoader
-from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
-from langchain_chroma import Chroma
-from langchain_openai import ChatOpenAI
-
 from dotenv import load_dotenv
+from langchain_chroma import Chroma
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
 load_dotenv()
 
-api_key = os.environ['MONOROUTER_API_KEY'].strip()
-base_url = 'https://monogpt.kr/api/monorouter/v1'
+api_key = os.environ["MONOROUTER_API_KEY"].strip()
+base_url = "https://monogpt.kr/api/monorouter/v1"
 
 
 # 1. 데이터
@@ -24,15 +21,15 @@ base_url = 'https://monogpt.kr/api/monorouter/v1'
 # 2. 데이터 자르기 (청킹)
 
 # 3. 임베딩
-from langchain_openai import OpenAIEmbeddings
+
 embeddings = OpenAIEmbeddings(
-    model = 'text-embedding-3-small',
+    model="text-embedding-3-small",
     api_key=api_key,
     base_url=base_url,
     # dimensions=5,
 )
 
-DB_PATH = './_db/Chroma12/'
+DB_PATH = "./_db/Chroma12/"
 
 # ========================================
 # 불러오기
@@ -40,7 +37,7 @@ DB_PATH = './_db/Chroma12/'
 vector_store = Chroma(
     embedding_function=embeddings,
     persist_directory=DB_PATH,
-    collection_name='chroma12',
+    collection_name="chroma12",
 )
 
 # print(f"벡터 저장소에 저장된 문서 수 : : {vector_store._collection.count()}",)
@@ -49,12 +46,12 @@ vector_store = Chroma(
 query = "반도체에서 눈여겨 봐야할 부분은 무엇인가요?"
 result = vector_store.similarity_search(query)
 
-print(f"검색 결과의 길이 : {len(result)}")              # 4
+print(f"검색 결과의 길이 : {len(result)}")  # 4
 
 ########################### retrievers ############################
 ############################# 검색기 ##############################
 
-retriever = vector_store.as_retriever(search_kwargs={"k":2})
+retriever = vector_store.as_retriever(search_kwargs={"k": 2})
 print(retriever)
 # tags=['Chroma', 'OpenAIEmbeddings']
 # vectorstore=<langchain_chroma.vectorstores.Chroma object at 0x000001D94EBD2090> search_kwargs={'k': 2}
@@ -66,10 +63,9 @@ print(f"첫번째 관련 문서 내용 미리보기 : {aaa[0].page_content[:50]}
 
 print("=============================================================================")
 ######################## 모델 연결 #################################
-from langchain_openai import ChatOpenAI
 
 model = ChatOpenAI(
-    model = 'gpt-5-nano',
+    model="gpt-5-nano",
     temperature=0,
     max_tokens=1000,
     api_key=api_key,
@@ -91,4 +87,4 @@ query_with_context = f"""
 """
 
 response = model.invoke(query_with_context)
-print("model의 대답 :",response.content)
+print("model의 대답 :", response.content)

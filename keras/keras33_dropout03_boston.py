@@ -1,20 +1,23 @@
-'''
+"""
 2026-09-14 (월)
 # 31_3_boston 카피
-'''
+"""
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.datasets import boston_housing
-from sklearn.model_selection import train_test_split
-import numpy as np
 import time
+
+import numpy as np
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.datasets import boston_housing
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.models import Sequential
+
 # 1. 데이터
 (x_train, y_train), (x_test, y_test) = boston_housing.load_data()
 # print(x_train.shape, x_test.shape) # (404, 13) (102, 13)
 # print(y_train.shape, y_test.shape) # (404,) (102,)
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -40,30 +43,27 @@ print(np.min(x_test), np.max(x_test))
 
 # 2. 모델구성
 
-from tensorflow.keras.layers import Dropout
 
 model = Sequential()
-model.add(Dense(64,input_shape=(13,)))
+model.add(Dense(64, input_shape=(13,)))
 model.add(Dropout(0.3))
 model.add(Dense(16))
 model.add(Dense(1))
 
 
 # 3. 컴파일, 훈련
-from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint   # ★ ModelCheckpoint
 
+model.compile(loss="mse", optimizer="adam")
 
-model.compile(loss='mse', optimizer='adam')
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="min",
+    patience=30,
+    restore_best_weights=True,
+    verbose=1,
+)
 
-es = EarlyStopping(              
-    monitor = 'val_loss',        
-    mode = 'min',                 
-    patience = 30,                
-    restore_best_weights = True,
-    verbose = 1,
-    )
-
-#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+# ★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -80,7 +80,7 @@ es = EarlyStopping(
 # 내가 생각하는 파일명 ex)
 # './_save/keras30/' + 'k30_' + '0914_1147' + '0530-0.001.keras'
 
-#★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
+# ★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
 
 # mcp = ModelCheckpoint(                              # ★ mcp = ModelCheckpoint()
 #     monitor = 'val_loss',
@@ -90,34 +90,42 @@ es = EarlyStopping(
 #     verbose = 1,
 # )
 
-start_time = time.time()    
+start_time = time.time()
 
-hist = model.fit(x_train, y_train, 
-                 epochs=50000,
-                 batch_size=32, 
-                 validation_split=0.2,
-                 callbacks=[es]#, mcp ],              # ★callbacks = [mcp],
-                 )
+hist = model.fit(
+    x_train,
+    y_train,
+    epochs=50000,
+    batch_size=32,
+    validation_split=0.2,
+    callbacks=[es],  # , mcp ],              # ★callbacks = [mcp],
+)
 
-end_time = time.time()      
+end_time = time.time()
 
 print("=====================keras33_boston==============================")
 # 4. 평가, 예측
-loss = model.evaluate(x_test, y_test, )
-print('loss(mse) : ', loss)
+loss = model.evaluate(
+    x_test,
+    y_test,
+)
+print("loss(mse) : ", loss)
 
 # 평가지표 (r2)
-y_predict = model.predict(x_test)      # results = model.predict(x)
-from sklearn.metrics import r2_score, mean_squared_error
+y_predict = model.predict(x_test)  # results = model.predict(x)
+
 r2 = r2_score(y_test, y_predict)
 print("r2 :", r2)
 
 mse = mean_squared_error(y_test, y_predict)
 print("mse : ", mse)
-#RMSE함수의 정의
-def RMSE(y_test, y_predict):    
+
+
+# RMSE함수의 정의
+def RMSE(y_test, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
-    
+
+
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
 

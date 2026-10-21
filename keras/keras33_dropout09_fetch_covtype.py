@@ -1,21 +1,22 @@
-'''
+"""
 2026-09-14 (월)
 
 
-'''
+"""
+
+import time
 
 import numpy as np
 import pandas as pd
-import time
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.metrics import accuracy_score
-
 from sklearn.datasets import fetch_covtype
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.models import Sequential
 
-#1. 데이터
+# 1. 데이터
 datasets = fetch_covtype()
 
 
@@ -25,8 +26,8 @@ datasets = fetch_covtype()
 # print(datasets.DESCR)
 # print(datasets.feature_names)
 
-x = datasets.data      
-y = datasets['target']
+x = datasets.data
+y = datasets["target"]
 
 # print(x.shape, y.shape)
 # (581012, 54) (581012,)
@@ -35,12 +36,12 @@ y = datasets['target']
 # [5 5 2 ... 3 3 3]
 
 # print(np.unique(y, return_counts=True))
-# (array([1, 2, 3, 4, 5, 6, 7], dtype=int32), 
+# (array([1, 2, 3, 4, 5, 6, 7], dtype=int32),
 #  array([211840, 283301,  35754,   2747,   9493,  17367,  20510]))
 
 ####### to_categorical 활용 ######
 
-'''
+"""
 from tensorflow.keras.utils import to_categorical       # ★ OneHotEncoding ★
 y_oh = to_categorical(y)                                # ★ OneHotEncoding ★
 print(y_oh[:10])
@@ -60,10 +61,10 @@ print(y.shape)
 # (581012,)
 print(y_oh.shape)
 # (581012, 8)
-'''
+"""
 # from tensorflow.keras.utils import to_categorical       # ★ OneHotEncoding ★
-# y = to_categorical(y)  
- 
+# y = to_categorical(y)
+
 # print(y)
 # [[0. 0. 0. ... 1. 0. 0.]
 #  [0. 0. 0. ... 1. 0. 0.]
@@ -99,11 +100,12 @@ y = pd.get_dummies(y, dtype=int)
 # [581012 rows x 7 columns]
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.7,
-    random_state = 5252,
-    stratify = y,
-    shuffle = True,
+    x,
+    y,
+    train_size=0.7,
+    random_state=5252,
+    stratify=y,
+    shuffle=True,
 )
 
 # print(x_train.shape, x_test.shape)
@@ -111,7 +113,6 @@ x_train, x_test, y_train, y_test = train_test_split(
 # print(y_train.shape, y_test.shape)
 # (406708, 7) (174304, 7)
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -128,40 +129,40 @@ print(x_train)
 print(x_test)
 
 print(np.min(x_train), np.max(x_train))
-# 
+#
 print(np.min(x_test), np.max(x_test))
-# 
+#
 
 # exit()
 
-#2. 모델
+# 2. 모델
 
-from tensorflow.keras.layers import Dropout
 
 model = Sequential()
-model.add(Dense(78, input_shape = (54,), activation = 'relu'))
-model.add(Dense(126, activation = 'relu'))
+model.add(Dense(78, input_shape=(54,), activation="relu"))
+model.add(Dense(126, activation="relu"))
 model.add(Dropout(0.3))
-model.add(Dense(78, activation = 'relu'))
+model.add(Dense(78, activation="relu"))
 model.add(Dropout(0.2))
-model.add(Dense(20, activation = 'relu'))
-model.add(Dense(7, activation = 'softmax'))
+model.add(Dense(20, activation="relu"))
+model.add(Dense(7, activation="softmax"))
 
-#3. 컴파일, 훈련
+# 3. 컴파일, 훈련
 
-model.compile(loss='categorical_crossentropy',
-              optimizer = 'adam',
-              metrics=['acc'],
-              )
-
-es = EarlyStopping(
-    monitor = 'val_loss',
-    mode = 'auto',
-    patience = 30,
-    restore_best_weights = True,
+model.compile(
+    loss="categorical_crossentropy",
+    optimizer="adam",
+    metrics=["acc"],
 )
 
-#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="auto",
+    patience=30,
+    restore_best_weights=True,
+)
+
+# ★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -192,23 +193,27 @@ es = EarlyStopping(
 
 start_time = time.time()
 
-model.fit(x_train, y_train,
-          epochs = 1000,
-          batch_size = 5000,
-          verbose = 1,
-          validation_split = 0.2,
-          callbacks = [es, ]#mcp],
-          )
+model.fit(
+    x_train,
+    y_train,
+    epochs=1000,
+    batch_size=5000,
+    verbose=1,
+    validation_split=0.2,
+    callbacks=[
+        es,
+    ],  # mcp],
+)
 
 end_time = time.time()
 
-#.4 평가, 예측
+# .4 평가, 예측
 
 print("==================== keras33_fetch_covtype ========================")
 
 result = model.evaluate(x_test, y_test)
-print('loss : ', result[0])
-print('acc : ', round(result[1],2))
+print("loss : ", result[0])
+print("acc : ", round(result[1], 2))
 
 y_predict = model.predict(x_test)
 
@@ -223,11 +228,11 @@ y_test = np.argmax(y_test, axis=1)
 
 
 accuracy_score = accuracy_score(y_test, y_predict)
-print('acc_score : ', accuracy_score)
-print('걸린시간 : ', round(end_time - start_time, 2),'sec')
+print("acc_score : ", accuracy_score)
+print("걸린시간 : ", round(end_time - start_time, 2), "sec")
 
 
-'''
+"""
 ==================== keras31_fetch_covtype ========================
 5447/5447 ━━━━━━━━━━━━━━━━━━━━ 4s 796us/step - acc: 0.9295 - loss: 0.1853 
 loss :  0.1852918565273285
@@ -244,4 +249,4 @@ acc :  0.92
 acc_score :  0.9206960253350468
 걸린시간 :  327.42 sec
 
-'''
+"""

@@ -1,40 +1,39 @@
-'''
+"""
 2026-09-17 (목)
 
 DNN모델을 CNN모델로 변환
-'''
+"""
+
+import time
 
 import numpy as np
-import pandas as pd
-import time
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D, GlobalAveragePooling2D
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
-from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
-from sklearn.preprocessing import OneHotEncoder
-
 from sklearn.datasets import fetch_california_housing
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Conv2D, Dense, Dropout, GlobalAveragePooling2D
+from tensorflow.keras.models import Sequential
 
-path = './_save/keras30/'
+path = "./_save/keras30/"
 
 
-#1. 데이터
+# 1. 데이터
 datasets = fetch_california_housing()
 
 x = datasets.data
 y = datasets.target
 
 
-print(x.shape, y.shape) 
+print(x.shape, y.shape)
 # (20640, 8) (20640,)
 
 # exit()
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.75,
+    x,
+    y,
+    train_size=0.75,
     # test_size = 0.25,
     # shuffle = True
     random_state=99284,
@@ -72,75 +71,78 @@ x_test = x_test.reshape(-1, 8, 1, 1)
 # 2. 모델 구성
 
 model = Sequential()
-model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu', input_shape=(8, 1, 1)))
-model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(64, (2, 1), padding="same", activation="relu", input_shape=(8, 1, 1)))
+model.add(Conv2D(64, (2, 1), padding="same", activation="relu"))
 model.add(Dropout(0.2))
 
-model.add(Conv2D(32, (2, 1), padding = 'same', activation = 'relu'))
-model.add(Conv2D(32, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(32, (2, 1), padding="same", activation="relu"))
+model.add(Conv2D(32, (2, 1), padding="same", activation="relu"))
 model.add(Dropout(0.3))
 
-model.add(Conv2D(16, (2, 1), padding = 'same', activation = 'relu'))
-model.add(Conv2D(16, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(16, (2, 1), padding="same", activation="relu"))
+model.add(Conv2D(16, (2, 1), padding="same", activation="relu"))
 model.add(Dropout(0.3))
 
 
 model.add(GlobalAveragePooling2D())
-model.add(Dense(4, activation='relu'))
+model.add(Dense(4, activation="relu"))
 model.add(Dense(1))
 
 model.summary()
 
 # exit()
 # 3. 컴파일, 훈련
-model.compile(loss='mse', optimizer='adam')
+model.compile(loss="mse", optimizer="adam")
 
-es = EarlyStopping(              
-    monitor = 'val_loss',        
-    mode = 'min',                 
-    patience = 30,                
-    restore_best_weights = True,
-    verbose = 1,
-    )
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="min",
+    patience=30,
+    restore_best_weights=True,
+    verbose=1,
+)
 
 
-start_time = time.time()    
+start_time = time.time()
 
-hist = model.fit(x_train, y_train, 
-                 epochs=1000,
-                 batch_size=64, 
-                 validation_split=0.2,
-                  callbacks=[es],  
-                 )
+hist = model.fit(
+    x_train,
+    y_train,
+    epochs=1000,
+    batch_size=64,
+    validation_split=0.2,
+    callbacks=[es],
+)
 
-end_time = time.time()      
+end_time = time.time()
 
 
 print("===================keras42_cnn_california==========================")
 
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
 # 평가(보조)지표-R2
 y_predict = model.predict(x_test)
-from sklearn.metrics import r2_score
 
 r2 = r2_score(y_test, y_predict)
-print("r2 = : ", r2 )
+print("r2 = : ", r2)
 
 mse = mean_squared_error(y_test, y_predict)
-print('mse : ', mse)
+print("mse : ", mse)
 
-#RMSE함수의 정의
+
+# RMSE함수의 정의
 def RMSE(y_tset, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
+
 
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
 
-print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2), "sec")
 
 # print("============================ history =================================")
 # print(hist)
@@ -167,11 +169,11 @@ print("훈련시간 :", round(end_time - start_time, 2),"sec")
 
 # plt.ylabel('loss')
 
-# plt.grid()    
-# plt.show()    
+# plt.grid()
+# plt.show()
 
 # exit()
-'''
+"""
 ########### submission.csv 만들기 // count 컬럼에 값 넣어주기 #################
 print(submission) #[715 rows x 1 columns]
 y_submit = model.predict(test_csv)
@@ -181,9 +183,9 @@ print(submission) # [715 rows x 1 columns]
 print(submission.shape)  # (715, 1)
 
 submission.to_csv(path + "submit/" + "submit_0907_1014.csv")
-'''
+"""
 
-'''
+"""
 --cpu----------------------------------
 
 Epoch 30/30
@@ -208,6 +210,4 @@ r2 = :  0.7555503695492564
 mse :  0.3288343591579846
 RMSE :  0.5734408070219493
 훈련시간 : 134.04 sec
-'''
-
-
+"""

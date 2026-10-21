@@ -1,8 +1,8 @@
 # 2026-09-02 수
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
 from tensorflow.keras.datasets import boston_housing
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Sequential
 
 # 1. 데이터
 (x_train, y_train), (x_test, y_test) = boston_housing.load_data()
@@ -12,7 +12,7 @@ from tensorflow.keras.datasets import boston_housing
 
 # 2. 모델구성
 model = Sequential()
-model.add(Dense(50,input_dim=13))
+model.add(Dense(50, input_dim=13))
 model.add(Dense(40))
 model.add(Dense(30))
 model.add(Dense(20))
@@ -21,12 +21,12 @@ model.add(Dense(1))
 
 
 # 3. 컴파일, 훈련
-model.compile(loss='mse', optimizer='adam')
+model.compile(loss="mse", optimizer="adam")
 model.fit(x_train, y_train, epochs=500, batch_size=32)
 
 print("=============================================")
 # 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
-#loss :  25.53618621826172
+# loss :  25.53618621826172

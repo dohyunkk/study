@@ -1,21 +1,21 @@
-'''
+"""
 2026-09-14 (월)
 
-'''
+"""
+
+import time
 
 import numpy as np
 import pandas as pd
-import time
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.metrics import accuracy_score
-
 from sklearn.datasets import load_wine
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dense, Dropout, Input
+from tensorflow.keras.models import Model
 
-
-#1. 데이터
+# 1. 데이터
 datasets = load_wine()
 
 # print(datasets)
@@ -61,11 +61,12 @@ y = pd.get_dummies(y, dtype=int)
 # exit()
 # train_test 분리
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.7,
-    random_state = 5252,
-    stratify = y,
-    shuffle = True,
+    x,
+    y,
+    train_size=0.7,
+    random_state=5252,
+    stratify=y,
+    shuffle=True,
 )
 
 # print(x_train.shape, x_test.shape)
@@ -73,7 +74,6 @@ x_train, x_test, y_train, y_test = train_test_split(
 # print(y_train.shape, y_test.shape)
 # (124, 3) (54, 3)
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -96,10 +96,8 @@ print(np.min(x_test), np.max(x_test))
 
 # exit()
 
-#2. 모델
+# 2. 모델
 
-from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.layers import Dense, Dropout, Input
 
 # model = Sequential()
 # model.add(Dense(39, input_shape = (13,), activation = 'relu'))
@@ -113,12 +111,12 @@ from tensorflow.keras.layers import Dense, Dropout, Input
 # model.summary()
 
 input1 = Input(shape=(13,))
-dense1 = Dense(39, activation = 'relu')(input1)
-dense2 = Dense(78, activation = 'relu')(dense1)
-dense3 = Dense(156, activation = 'relu')(dense2)
+dense1 = Dense(39, activation="relu")(input1)
+dense2 = Dense(78, activation="relu")(dense1)
+dense3 = Dense(156, activation="relu")(dense2)
 drop1 = Dropout(0.3)(dense3)
-dense4 = Dense(39, activation = 'relu')(drop1)
-dense5 = Dense(20, activation = 'relu')(dense4)
+dense4 = Dense(39, activation="relu")(drop1)
+dense5 = Dense(20, activation="relu")(dense4)
 output1 = Dense(3)(dense5)
 
 model = Model(inputs=input1, outputs=output1)
@@ -126,21 +124,22 @@ model = Model(inputs=input1, outputs=output1)
 
 # exit()
 
-#3. 컴파일, 훈련
+# 3. 컴파일, 훈련
 
-model.compile(loss='categorical_crossentropy',
-              optimizer = 'adam',
-              metrics=['acc'],
-              )
-
-es = EarlyStopping(
-    monitor = 'val_loss',
-    mode = 'auto',
-    patience = 30,
-    restore_best_weights = True,
+model.compile(
+    loss="categorical_crossentropy",
+    optimizer="adam",
+    metrics=["acc"],
 )
 
-#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="auto",
+    patience=30,
+    restore_best_weights=True,
+)
+
+# ★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -171,23 +170,27 @@ es = EarlyStopping(
 
 start_time = time.time()
 
-model.fit(x_train, y_train,
-          epochs = 1000,
-          batch_size = 64,
-          verbose = 1,
-          validation_split = 0.2,
-          callbacks = [es,]# mcp],
-          )
+model.fit(
+    x_train,
+    y_train,
+    epochs=1000,
+    batch_size=64,
+    verbose=1,
+    validation_split=0.2,
+    callbacks=[
+        es,
+    ],  # mcp],
+)
 
 end_time = time.time()
 
-#.4 평가, 예측
+# .4 평가, 예측
 
 print("====================== keras34_wine ==============================")
 
 result = model.evaluate(x_test, y_test)
-print('loss : ', result[0])
-print('acc : ', round(result[1],2))
+print("loss : ", result[0])
+print("acc : ", round(result[1], 2))
 
 y_predict = model.predict(x_test)
 
@@ -211,11 +214,11 @@ y_test = np.argmax(y_test, axis=1)
 #  0 0 1 1 2 2 2 2 0 0 0 1 1 1 2 2 1]
 
 accuracy_score = accuracy_score(y_test, y_predict)
-print('acc_score : ', accuracy_score)
-print('걸린시간 : ', round(end_time - start_time, 2),'sec')
+print("acc_score : ", accuracy_score)
+print("걸린시간 : ", round(end_time - start_time, 2), "sec")
 
 
-'''
+"""
 ====================== keras31_wine ==============================
 2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step - acc: 0.9815 - loss: 0.0846
 loss :  0.08458784222602844
@@ -240,4 +243,4 @@ acc :  0.94
 acc_score :  0.9444444444444444
 걸린시간 :  4.09 sec
 
-'''
+"""

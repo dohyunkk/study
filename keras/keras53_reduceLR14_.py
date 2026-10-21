@@ -1,4 +1,4 @@
-'''
+"""
 2026-09-23 (수)
 
 52 카피
@@ -10,25 +10,21 @@ rlr = ReduceLROnPlateau(
     monitor='val_loss',
     mode='auto',
     patience=20,
-    verbose=1, 
+    verbose=1,
     factor=0.5,
 )
-'''
+"""
 
-
-import numpy as np
-import pandas as pd
 import time
 
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D, GlobalAveragePooling2D
+import numpy as np
 from sklearn.metrics import accuracy_score
-from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.preprocessing import OneHotEncoder
-import matplotlib.pyplot as plt
-
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.datasets import cifar100
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import Adam
 
 (x_train, y_train), (x_test, y_test) = cifar100.load_data()
 
@@ -47,8 +43,8 @@ from tensorflow.keras.datasets import cifar100
 # exit()
 
 ############### 스케일링 1
-x_train = x_train/255.
-x_test = x_test/255.
+x_train = x_train / 255.0
+x_test = x_test / 255.0
 
 # print(np.min(x_train), np.max(x_train))   # 0.0 1.0
 # print(np.min(x_test), np.max(x_test))     # 0.0 1.0
@@ -71,22 +67,22 @@ print(y_train.shape, y_test.shape)
 
 # exit()
 
-# 2. 모델구성 
+# 2. 모델구성
 # DNN 모델
 model = Sequential()
-model.add(Dense(1024, activation='relu', input_shape = (3072, )))
+model.add(Dense(1024, activation="relu", input_shape=(3072,)))
 model.add(Dropout(0.2))
 
-model.add(Dense(512, activation='relu'))
+model.add(Dense(512, activation="relu"))
 model.add(Dropout(0.3))
 
-model.add(Dense(256, activation='relu'))
+model.add(Dense(256, activation="relu"))
 model.add(Dropout(0.3))
 
-model.add(Dense(128, activation='relu'))
+model.add(Dense(128, activation="relu"))
 model.add(Dropout(0.4))
 
-model.add(Dense(100, activation='softmax'))
+model.add(Dense(100, activation="softmax"))
 
 
 model.summary()
@@ -94,68 +90,69 @@ model.summary()
 
 # exit()
 
-#3. 컴파일, 훈련
-from tensorflow.keras.optimizers import Adam
+# 3. 컴파일, 훈련
 
 # learning_rate = 0.01
-learning_rate = 0.001   # 디폴트값
+learning_rate = 0.001  # 디폴트값
 # learning_rate = 0.0001
 # learning_rate = 0.005
 # learning_rate = 0.05
 # learning_rate = 0.009
 
-model.compile(loss='categorical_crossentropy', 
-              optimizer = Adam(learning_rate=learning_rate), 
-              metrics=['acc'],
-              )
+model.compile(
+    loss="categorical_crossentropy",
+    optimizer=Adam(learning_rate=learning_rate),
+    metrics=["acc"],
+)
 
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
-es = EarlyStopping(         
-    monitor = 'val_loss',        
-    mode = 'auto',                 
-    patience = 40,                
-    verbose = 1,
-    restore_best_weights = True,  
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="auto",
+    patience=40,
+    verbose=1,
+    restore_best_weights=True,
 )
 
 rlr = ReduceLROnPlateau(
-    monitor='val_loss',
-    mode='auto',
+    monitor="val_loss",
+    mode="auto",
     patience=20,
-    verbose=1, 
+    verbose=1,
     factor=0.5,
 )
 
 start_time = time.time()
 
-model.fit(x_train, y_train,
-          epochs = 5000,
-          batch_size = 128,
-          verbose = 1,
-          validation_split = 0.2,
-          callbacks=[es, rlr],
-          )
+model.fit(
+    x_train,
+    y_train,
+    epochs=5000,
+    batch_size=128,
+    verbose=1,
+    validation_split=0.2,
+    callbacks=[es, rlr],
+)
 
 end_time = time.time()
 
 
-#4. 평가, 예측
+# 4. 평가, 예측
 print("------------------ keras53_reducel_cifar100 --------------------")
-loss = model.evaluate(x_test, y_test, verbose = 1)
-print('loss : ', loss[0])
-print('acc : ', loss[1])
+loss = model.evaluate(x_test, y_test, verbose=1)
+print("loss : ", loss[0])
+print("acc : ", loss[1])
 
 y_predict = model.predict(x_test)
 
-y_predict = np.argmax(y_predict, axis = 1)#.reshape(-1, 1)
-y_test = np.argmax(y_test, axis = 1)#.reshape(-1, 1)
+y_predict = np.argmax(y_predict, axis=1)  # .reshape(-1, 1)
+y_test = np.argmax(y_test, axis=1)  # .reshape(-1, 1)
 
 acc_score = accuracy_score(y_test, y_predict)
-print('accuracy_score : ', acc_score)
-print('걸린 시간 : ', round(end_time - start_time, 2),'sec')
+print("accuracy_score : ", acc_score)
+print("걸린 시간 : ", round(end_time - start_time, 2), "sec")
 
-'''
+"""
 
 cnn
 Epoch 81: early stopping
@@ -194,4 +191,4 @@ acc :  0.17419999837875366
 313/313 [==============================] - 0s 949us/step
 accuracy_score :  0.1742
 걸린 시간 :  275.61 sec
-'''
+"""

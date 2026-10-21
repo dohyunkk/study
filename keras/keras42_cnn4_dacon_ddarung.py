@@ -1,77 +1,75 @@
-'''
+"""
 2026-09-17 (목)
 
 DNN모델을 CNN모델로 변환
 
 https://dacon.io/competitions/open/235576/data
-'''
+"""
 
-
+import time
 
 import numpy as np
 import pandas as pd
-import time
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D, GlobalAveragePooling2D
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
-from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Conv2D, Dense, Dropout, GlobalAveragePooling2D
+from tensorflow.keras.models import Sequential
 
-#1. 데이터
+# 1. 데이터
 
-path = "c:/study/_data/ddarung/"       #절대경로 
+path = "c:/study/_data/ddarung/"  # 절대경로
 
 
 train_csv = pd.read_csv(path + "train.csv", index_col=0)
-# print(train_csv)   
+# print(train_csv)
 # id열 포함 [1459 rows x 11 columns]
 # id열 미포함 [1459 rows x 10 columns]
 
 test_csv = pd.read_csv(path + "test.csv", index_col=0)
-# print(test_csv) 
+# print(test_csv)
 # id열 미포함 [715 rows x 9 columns]
 
 submission = pd.read_csv(path + "submission.csv", index_col=0)
 # print(submission)
 # id열 미포함 [715 rows x 1 columns]
 
-# print(train_csv.shape) 
+# print(train_csv.shape)
 # (1459, 10)
-# print(test_csv.shape)  
+# print(test_csv.shape)
 # (715, 9)
 # print(submission.shape)
 # (715, 1)
 
 # print(train_csv.columns)
 
-#print(train_csv.info())
+# print(train_csv.info())
 
-#print(test_csv.info())
+# print(test_csv.info())
 
-# exit() 
+# exit()
 
 ######################### 결측치 처리 1. 삭제 #########################
 
 train_csv = train_csv.dropna()
-#print(train_csv) # [1328 rows x 10 columns]
+# print(train_csv) # [1328 rows x 10 columns]
 
 #################3###### train_csv를 x와 y로 분리######################
 
-x = train_csv.drop(['count'], axis=1) # 카운트라는 열(컬럼)을 삭제하겠다.
-#print(x) # [1328 rows x 9 columns]
+x = train_csv.drop(["count"], axis=1)  # 카운트라는 열(컬럼)을 삭제하겠다.
+# print(x) # [1328 rows x 9 columns]
 
-y = train_csv['count']
-#print(y)
-#print(y.shape) # (1328,)
+y = train_csv["count"]
+# print(y)
+# print(y.shape) # (1328,)
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y, 
+    x,
+    y,
     random_state=23,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 scaler = StandardScaler()
@@ -95,70 +93,74 @@ x_test = scaler.transform(x_test)
 x_train = x_train.reshape(-1, 9, 1, 1)
 x_test = x_test.reshape(-1, 9, 1, 1)
 
-print(x_train.shape) # (331, 10, 1, 1)
+print(x_train.shape)  # (331, 10, 1, 1)
 
 
 # exit()
 
-#2. 모델 구성
+# 2. 모델 구성
 
 model = Sequential()
-model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu', input_shape = (9, 1, 1)))
-model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(64, (2, 1), padding="same", activation="relu", input_shape=(9, 1, 1)))
+model.add(Conv2D(64, (2, 1), padding="same", activation="relu"))
 model.add(Dropout(0.2))
 
-model.add(Conv2D(32, (2, 1), padding = 'same', activation = 'relu'))
-model.add(Conv2D(32, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(32, (2, 1), padding="same", activation="relu"))
+model.add(Conv2D(32, (2, 1), padding="same", activation="relu"))
 model.add(Dropout(0.3))
 
 model.add(GlobalAveragePooling2D())
-model.add(Dense(16, activation='relu'))
+model.add(Dense(16, activation="relu"))
 model.add(Dense(1))
 
 model.summary()
 
 
 # 3. 컴파일, 훈련
-model.compile(loss='mse', optimizer='adam')
+model.compile(loss="mse", optimizer="adam")
 
 
-es = EarlyStopping(               
-    monitor = 'val_loss',         
-    mode = 'min',                 
-    patience = 15,                
-    restore_best_weights = True,  
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="min",
+    patience=15,
+    restore_best_weights=True,
 )
 
 
-
-start_time = time.time()     
-hist = model.fit(x_train, y_train, 
-                 epochs=1000,
-                 batch_size=32, 
-                 validation_split=0.2,
-                 callbacks=[es, ] # mcp],
-                 )
-end_time = time.time()       
+start_time = time.time()
+hist = model.fit(
+    x_train,
+    y_train,
+    epochs=1000,
+    batch_size=32,
+    validation_split=0.2,
+    callbacks=[
+        es,
+    ],  # mcp],
+)
+end_time = time.time()
 
 print("===================== keras42_cnn_ddarung ================================")
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
 # 평가지표(r2)
 y_predict = model.predict(x_test)
-from sklearn.metrics import r2_score
 r2 = r2_score(y_test, y_predict)
 print("r2 = : ", r2)
 
 mse = mean_squared_error(y_test, y_predict)
 print("mse : ", mse)
 
-#RMSE함수의 정의
-def RMSE(y_test, y_predict):    
+
+# RMSE함수의 정의
+def RMSE(y_test, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
-    
+
+
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
 
@@ -174,7 +176,7 @@ print("RMSE : ", rmse)
 # mse :  2679.2930744357695
 # RMSE :  51.761888242564815
 
-print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2), "sec")
 
 # print("============================ history =================================")
 # print(hist)

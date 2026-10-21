@@ -1,4 +1,4 @@
-'''
+"""
 2026-10-06
 11-1 카피
 
@@ -12,28 +12,27 @@ from glob import glob
 매서드가 나오면 아 함수구나~ 매서드는 특히 반복되는 것에서 많이 쓰인다.
 
 chroma 실습 문서 저장, 실행
-'''
+"""
 
 import os
-
-from langchain_community.document_loaders import TextLoader
-from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
-from langchain_chroma import Chroma
-from langchain_openai import ChatOpenAI
-
-from dotenv import load_dotenv
-load_dotenv()
-
-api_key = os.environ['MONOROUTER_API_KEY'].strip()
-base_url = 'https://monogpt.kr/api/monorouter/v1'
-
 from glob import glob
 
-path = './_data/rag_data/'
+from dotenv import load_dotenv
+from langchain_chroma import Chroma
+from langchain_community.document_loaders import TextLoader
+from langchain_openai import OpenAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+load_dotenv()
+
+api_key = os.environ["MONOROUTER_API_KEY"].strip()
+base_url = "https://monogpt.kr/api/monorouter/v1"
+
+
+path = "./_data/rag_data/"
 
 # 폴더에서 text 파일 목록 가져오기
-txt_files = glob(os.path.join(path, '*.txt'))
+txt_files = glob(os.path.join(path, "*.txt"))
 
 # print(txt_files)
 # ['./_data/rag_data\\2026_AI_for_All.txt', './_data/rag_data\\nvidia_outlook.txt', './_data/rag_data\\samsung_outlook.txt']
@@ -44,7 +43,7 @@ txt_files = glob(os.path.join(path, '*.txt'))
 # 01. 데이터 불러온다
 data = []
 for text_file in txt_files:
-    loader = TextLoader(text_file, encoding='utf-8')
+    loader = TextLoader(text_file, encoding="utf-8")
     # data.append(loader)
     data += loader.load()
 
@@ -54,22 +53,22 @@ print("==========================================")
 # print(len(data))                                             # 3
 # print(data[0].page_content)
 
-char_count = [len(doc.page_content) for doc in data]           # 간략화된 for 문
-print(char_count)                                              # [8158, 2049, 1898]
+char_count = [len(doc.page_content) for doc in data]  # 간략화된 for 문
+print(char_count)  # [8158, 2049, 1898]
 
 
 # 02. 문서 자른다. (청킹) - 벡터화 하기 위해.
-text_splitter = RecursiveCharacterTextSplitter(                 # 재귀적 문자 텍스트 분할기
+text_splitter = RecursiveCharacterTextSplitter(  # 재귀적 문자 텍스트 분할기
     chunk_size=300,
     chunk_overlap=10,
-    separators=["\n\n", "\n", " ", ""]                          # 통상 디폴트
+    separators=["\n\n", "\n", " ", ""],  # 통상 디폴트
 )
 
 texts = text_splitter.split_documents(data)
-# print("생성된 텍스트 청크 수 :", len(texts))                           
+# print("생성된 텍스트 청크 수 :", len(texts))
 # # 생성된 텍스트 청크 수 : 52
 # print("각 청크의 길이 :", list(len(text.page_content)for text in texts))
-# 각 청크의 길이 : 
+# 각 청크의 길이 :
 # [259, 282, 282, 128, 276, 214, 158, 249, 262, 291, 268, 182, 286, 295, 182, 162, 283, 286, 257, 235, 214, 258, 207, 286, 220, 198,
 #  271, 57, 272, 122, 9, 269, 299, 284, 289, 209, 222, 230, 254, 249, 296, 90, 247, 243, 185, 219, 239, 235, 298, 282, 187, 249]
 
@@ -94,10 +93,8 @@ print("두번째 청크의 내용 : ", len(texts[1].page_content))
 # 청킹돼서 나온 다큐먼츠(page_content) 안에는 컨텐츠와 메타데이타(metadata)가 있다.
 
 
-
-from langchain_openai import OpenAIEmbeddings
 embeddings = OpenAIEmbeddings(
-    model = 'text-embedding-3-small',
+    model="text-embedding-3-small",
     api_key=api_key,
     base_url=base_url,
     # dimensions=5,                                  # 출력 벡터 차원을 5 로 지정 (text-embedding-3 계열 모델에서만 사용 가능)
@@ -109,14 +106,14 @@ vector = embeddings.embed_query(sample_text)
 # print(len(vector))  # vector의 길이(개수) : 1536
 
 
-DB_PATH = './_db/Chroma12/'
+DB_PATH = "./_db/Chroma12/"
 
 # 저장
 vector_store = Chroma.from_documents(
     documents=texts,
     embedding=embeddings,
     persist_directory=DB_PATH,
-    collection_name='chroma12',
+    collection_name="chroma12",
 )
 
 # print(f"벡터 저장소에 저장된 문서 수 : : {vector_store._collection.count()}",)
@@ -125,12 +122,12 @@ vector_store = Chroma.from_documents(
 query = " 삼성전자의 창업자는 누구인가요?"
 result = vector_store.similarity_search(query)
 
-print(f"검색 결과의 길이 : {len(result)}")              # 4
+print(f"검색 결과의 길이 : {len(result)}")  # 4
 
 ########################### retrievers ############################
 
 ############################# 검색기 ##############################
-retriever = vector_store.as_retriever(search_kwargs={"k":2})
+retriever = vector_store.as_retriever(search_kwargs={"k": 2})
 
 print(retriever)
 # tags=['Chroma', 'OpenAIEmbeddings']

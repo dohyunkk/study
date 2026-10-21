@@ -1,4 +1,4 @@
-'''
+"""
 2026-09-11 (금)
 keras29_3  카피
 
@@ -19,40 +19,37 @@ model = load_model(path + 'keras29_1_save_model.keras')
 1. #2 모델만 가져올래.
 2. #3 컴파일, 훈련까지 가져올래.
 
-'''
+"""
 
 import numpy as np
-import pandas as pd
-import time
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
 from sklearn.datasets import fetch_california_housing
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.models import load_model
 
 # from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
-#1. 데이터
+# 1. 데이터
 datasets = fetch_california_housing()
 
 x = datasets.data
 y = datasets.target
 
 
-# print(x.shape, y.shape) 
+# print(x.shape, y.shape)
 # (20640, 8) (20640,)
 
 
-
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.75,
+    x,
+    y,
+    train_size=0.75,
     # test_size = 0.25,
     # shuffle = True
     random_state=20260910,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -90,9 +87,9 @@ print(np.min(x_test), np.max(x_test))
 
 # model.summary()
 
-path = './_save/keras29/'
+path = "./_save/keras29/"
 # model.save(path + 'keras29_1_save_model.keras')
-model = load_model(path + 'keras29_3_save_model.keras')
+model = load_model(path + "keras29_3_save_model.keras")
 
 # model.summary()
 
@@ -102,22 +99,22 @@ model = load_model(path + 'keras29_3_save_model.keras')
 # model.compile(loss='mse', optimizer='adam')
 
 # from tensorflow.keras.callbacks import EarlyStopping
-# es = EarlyStopping(              
-#     monitor = 'val_loss',        
-#     mode = 'min',                 
-#     patience = 30,                
-#     restore_best_weights = True,  
+# es = EarlyStopping(
+#     monitor = 'val_loss',
+#     mode = 'min',
+#     patience = 30,
+#     restore_best_weights = True,
 # )
 
 
-# start_time = time.time()    
-# hist = model.fit(x_train, y_train, 
+# start_time = time.time()
+# hist = model.fit(x_train, y_train,
 #                  epochs=50000,
-#                  batch_size=600, 
+#                  batch_size=600,
 #                  validation_split=0.2,
 #                  callbacks=[es],
 #                  )
-# end_time = time.time()      
+# end_time = time.time()
 
 # model.save(path + 'keras29_3_save_model.keras')
 
@@ -125,23 +122,24 @@ model = load_model(path + 'keras29_3_save_model.keras')
 print("===================keras29_california==========================")
 
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
 # 평가(보조)지표-R2
 y_predict = model.predict(x_test)
-from sklearn.metrics import r2_score
 
 r2 = r2_score(y_test, y_predict)
-print("r2 = : ", r2 )
+print("r2 = : ", r2)
 
 mse = mean_squared_error(y_test, y_predict)
-print('mse : ', mse)
+print("mse : ", mse)
 
-#RMSE함수의 정의
+
+# RMSE함수의 정의
 def RMSE(y_tset, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
+
 
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
@@ -158,7 +156,6 @@ print("RMSE : ", rmse)
 # print(hist.history['val_loss'])
 # print("============================ history =================================")
 
-import matplotlib.pyplot as plt
 
 # print(plt.rcParams['font.family'])         # 그래프 출력시 ['sans-serif']폰트 가 디폴트이기 때문에 한글이 출력되지 않는다.
 
@@ -173,11 +170,11 @@ import matplotlib.pyplot as plt
 
 # plt.ylabel('loss')
 
-# plt.grid()    
-# plt.show()    
+# plt.grid()
+# plt.show()
 
 # exit()
-'''
+"""
 ########### submission.csv 만들기 // count 컬럼에 값 넣어주기 #################
 print(submission) #[715 rows x 1 columns]
 y_submit = model.predict(test_csv)
@@ -187,9 +184,9 @@ print(submission) # [715 rows x 1 columns]
 print(submission.shape)  # (715, 1)
 
 submission.to_csv(path + "submit/" + "submit_0907_1014.csv")
-'''
+"""
 
-'''
+"""
 ===============================================
 1차 시기
 random : 14
@@ -258,12 +255,10 @@ mse :  0.7861366521151975
 RMSE :  0.8866434752002619
 훈련시간 : 16.15 sec
 
-'''
+"""
 
 
-
-
-'''
+"""
 2026-09-10 (목)
 keras19_1  카피
 #1. 데이터
@@ -285,4 +280,4 @@ RobustScaler : 데이터의 중앙값 = 0, IQR = 1이 되도록 스케일링하�
 이상치에 강한 Scaler
 from sklearn.preprocessing import MinMaxScaler
 
-'''
+"""

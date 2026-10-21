@@ -15,28 +15,32 @@
 # LCEL = Langchain Expression Language
 # Chain = prompt | model | output_parser
 
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import PromptTemplate
 
 import os
+
 from dotenv import load_dotenv
+from langchain_openai import OpenAIEmbeddings
 
 load_dotenv()
 
-api_key = os.environ['MONOROUTER_API_KEY'].strip() # strip() 공백이나 줄바꿈을 무시 (오탈자로 인한 에러 방지용)
-base_url = 'https://monogpt.kr/api/monorouter/v1'
+api_key = os.environ[
+    "MONOROUTER_API_KEY"
+].strip()  # strip() 공백이나 줄바꿈을 무시 (오탈자로 인한 에러 방지용)
+base_url = "https://monogpt.kr/api/monorouter/v1"
 
-prompt = '삼성전자의 창업주는 누구인가요?'
+prompt = "삼성전자의 창업주는 누구인가요?"
 
-from langchain_openai import OpenAIEmbeddings
+
 embeddings = OpenAIEmbeddings(
-    model = 'text-embedding-3-small',
+    model="text-embedding-3-small",
     api_key=api_key,
     base_url=base_url,
-    dimensions=5,                                  # 출력 벡터 차원을 5 로 지정 (text-embedding-3 계열 모델에서만 사용 가능)
+    dimensions=5,  # 출력 벡터 차원을 5 로 지정 (text-embedding-3 계열 모델에서만 사용 가능)
 )
 
 vector = embeddings.embed_query(prompt)
-print(vector)                                      # 숫자 5개짜리 리스트
-print('==============================')
-print('임베딩 벡터의 차원: ', len(vector))          # dimensions 조절 가능 -> 임베딩 벡터의 차원:  5
+print(vector)  # 숫자 5개짜리 리스트
+print("==============================")
+print(
+    "임베딩 벡터의 차원: ", len(vector)
+)  # dimensions 조절 가능 -> 임베딩 벡터의 차원:  5

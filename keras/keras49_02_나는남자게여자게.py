@@ -1,21 +1,19 @@
-'''
+"""
 2026-09-21 (월)
 
-'''
+"""
+
 import numpy as np
 from keras.models import load_model
-from keras.utils import load_img, img_to_array
-
-
-
+from keras.utils import img_to_array, load_img
 
 # ----------------------------------------------------
-# 1. 
+# 1.
 # ----------------------------------------------------
-model_path = './_save/keras47/03/men-women0921_1702-0029-0.1487.keras' 
+model_path = "./_save/keras47/03/men-women0921_1702-0029-0.1487.keras"
 
 # 테스트할 내 사진 경로
-my_pic_path = './_data/image/me.png' 
+my_pic_path = "./_data/image/me.png"
 
 
 # ----------------------------------------------------
@@ -56,9 +54,9 @@ print(f" 최종 예측 결과 : {gender} 입니다.")
 print(f" 모델의 확신도   : {confidence:.2f}%")
 print("=" * 50)
 
-'''
+"""
 ==================================================
  최종 예측 결과 : 남성 (Men) 입니다.
  모델의 확신도   : 99.50%
 ==================================================
-'''
+"""

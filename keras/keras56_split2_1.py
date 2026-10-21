@@ -1,25 +1,30 @@
-'''
+"""
 2026-09-28 (월)
 
-'''
+"""
 
 import numpy as np
 
-a = np.array([[1,2,3,4,5,6,7,8,9,10],        # 삼성전자 주가
-              [9,8,7,6,5,4,3,2,1,0],         # 해당 날짜의 온도
-              ]).T   
+a = np.array(
+    [
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],  # 삼성전자 주가
+        [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],  # 해당 날짜의 온도
+    ]
+).T
 size = 5
-print(a.shape)    # (10, 2)
+print(a.shape)  # (10, 2)
 
 # 칠판처럼 짤라보아요 !!
 # split_x
 
-def split_x(dataset, size):                  
-    aaa = []                                 
-    for i in range(len(dataset) - size + 1): 
-        subset = dataset[i : (i+size)]       
-        aaa.append(subset)                   
-    return np.array(aaa)                     
+
+def split_x(dataset, size):
+    aaa = []
+    for i in range(len(dataset) - size + 1):
+        subset = dataset[i : (i + size)]
+        aaa.append(subset)
+    return np.array(aaa)
+
 
 bbb = split_x(a, size)
 # print(bbb)
@@ -34,13 +39,13 @@ bbb = split_x(a, size)
 
 # print(bbb.shape) # (8, 3, 2)
 
-x = bbb[:, :-1, :]                 # batch_size
+x = bbb[:, :-1, :]  # batch_size
 # x = bbb[:, :-1]
 
-y = bbb[:, -1, 0]                  # batch_size  
+y = bbb[:, -1, 0]  # batch_size
 # y = bbb[:, -1, -1]
 
-print('x : ')
+print("x : ")
 print(x)
-print('y : ')
+print("y : ")
 print(y)

@@ -1,32 +1,31 @@
-'''
+"""
 2026-09-17 (목)
 
 DNN모델을 CNN모델로 변환
 
 https://www.kaggle.com/competitions/santander-customer-transaction-prediction/data
 
-'''
+"""
+
+import time
 
 import numpy as np
 import pandas as pd
-import time
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D, GlobalAveragePooling2D
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
-from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Conv2D, Dense, Dropout, GlobalAveragePooling2D
+from tensorflow.keras.models import Sequential
 
-#1. 데이터
+# 1. 데이터
 # path = './_data/kaggle_santander/'              # 상대경로
-path = 'c:/study/_data/kaggle_santander/'         # 절대경로
+path = "c:/study/_data/kaggle_santander/"  # 절대경로
 
-train_csv = pd.read_csv(path + 'train.csv', index_col=0)
-test_csv = pd.read_csv(path + 'test.csv', index_col=0)
-submission_csv = pd.read_csv(path + 'sample_submission.csv', index_col=0)
-'''
+train_csv = pd.read_csv(path + "train.csv", index_col=0)
+test_csv = pd.read_csv(path + "test.csv", index_col=0)
+submission_csv = pd.read_csv(path + "sample_submission.csv", index_col=0)
+"""
 shape가 안 될 때
 
 import numpy as np
@@ -35,7 +34,7 @@ import numpy as np
 # y = np.array(y)
 # y = y.to_numpy()
 
-'''
+"""
 
 # print(train_csv)            # [200000 rows x 201 columns]
 # print(test_csv)             # [200000 rows x 200 columns]
@@ -50,8 +49,8 @@ import numpy as np
 # print(test_csv.isnull().sum())  # 결측치 확인
 
 
-x = train_csv.drop(['target'], axis=1)
-y = train_csv['target']
+x = train_csv.drop(["target"], axis=1)
+y = train_csv["target"]
 # print(x.shape, y.shape)      # (200000, 200) (200000,)
 
 # print(np.unique(y, return_counts=True))     # 파일의 행렬 보기
@@ -61,7 +60,7 @@ y = train_csv['target']
 y = pd.get_dummies(y, dtype=int)
 # print(y)
 #               0  1
-# ID_code           
+# ID_code
 # train_0       1  0
 # train_1       1  0
 # train_2       1  0
@@ -81,10 +80,11 @@ y = pd.get_dummies(y, dtype=int)
 # tarain_test_ 분리
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
+    x,
+    y,
     random_state=997,
     train_size=0.7,
-    stratify=y,                 # y_train과 y_predict의 값이 치우치지 않게 해줌.
+    stratify=y,  # y_train과 y_predict의 값이 치우치지 않게 해줌.
 )
 
 print(x_train.shape, x_test.shape)
@@ -121,56 +121,63 @@ x_test = x_test.reshape(-1, 200, 1, 1)
 
 # exit()
 
-#2. 모델
+# 2. 모델
 
 model = Sequential()
-model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu', input_shape = (200, 1, 1)))
-model.add(Conv2D(64, (2, 1), padding = 'same', activation = 'relu'))
+model.add(
+    Conv2D(64, (2, 1), padding="same", activation="relu", input_shape=(200, 1, 1))
+)
+model.add(Conv2D(64, (2, 1), padding="same", activation="relu"))
 model.add(Dropout(0.2))
 
-model.add(Conv2D(32, (2, 1), padding = 'same', activation = 'relu'))
-model.add(Conv2D(32, (2, 1), padding = 'same', activation = 'relu'))
+model.add(Conv2D(32, (2, 1), padding="same", activation="relu"))
+model.add(Conv2D(32, (2, 1), padding="same", activation="relu"))
 model.add(Dropout(0.3))
 
 model.add(GlobalAveragePooling2D())
-model.add(Dense(16, activation='relu'))
-model.add(Dense(2, activation = 'softmax'))
+model.add(Dense(16, activation="relu"))
+model.add(Dense(2, activation="softmax"))
 
 
-#3. 컴파일, 훈련
+# 3. 컴파일, 훈련
 
-model.compile(loss='categorical_crossentropy',
-              optimizer = 'adam',
-              metrics=['acc'],
-              )
+model.compile(
+    loss="categorical_crossentropy",
+    optimizer="adam",
+    metrics=["acc"],
+)
 
 es = EarlyStopping(
-    monitor = 'val_loss',
-    mode = 'auto',
-    patience = 30,
-    restore_best_weights = True,
+    monitor="val_loss",
+    mode="auto",
+    patience=30,
+    restore_best_weights=True,
 )
 
 
 start_time = time.time()
 
-model.fit(x_train, y_train,
-          epochs = 1000,
-          batch_size = 2500,
-          verbose = 1,
-          validation_split = 0.2,
-          callbacks = [es, ]#mcp],
-          )
+model.fit(
+    x_train,
+    y_train,
+    epochs=1000,
+    batch_size=2500,
+    verbose=1,
+    validation_split=0.2,
+    callbacks=[
+        es,
+    ],  # mcp],
+)
 
 end_time = time.time()
 
-#.4 평가, 예측
+# .4 평가, 예측
 
-print('=============== keras42_cnn_santander ===========================')
+print("=============== keras42_cnn_santander ===========================")
 
 result = model.evaluate(x_test, y_test)
-print('loss : ', result[0])
-print('acc : ', round(result[1],2))
+print("loss : ", result[0])
+print("acc : ", round(result[1], 2))
 
 y_predict = model.predict(x_test)
 
@@ -193,10 +200,10 @@ y_test = np.argmax(y_test, axis=1)
 
 
 accuracy_score = accuracy_score(y_test, y_predict)
-print('============================================================')
-print('acc_score : ', accuracy_score)
-print('걸린시간 : ', round(end_time - start_time, 2),'sec')
-print('============================================================')
+print("============================================================")
+print("acc_score : ", accuracy_score)
+print("걸린시간 : ", round(end_time - start_time, 2), "sec")
+print("============================================================")
 
 # csv_만들기
 # print(submission_csv)        # [200000 rows x 1 columns]
@@ -205,7 +212,7 @@ print('============================================================')
 # y_pred = model.predict(test_csv)
 # y_pred = np.argmax(y_pred, axis = 1)
 
-# print(np.unique(y_pred, return_counts=True)) 
+# print(np.unique(y_pred, return_counts=True))
 # (array([0, 1]), array([193522,   6478]))
 # print(y_pred.shape)
 # (200000,)
@@ -213,7 +220,7 @@ print('============================================================')
 # submission_csv['target'] = y_pred
 # submission_csv.to_csv(path + "submit/" + "submit_0910_1040.csv")
 
-'''
+"""
 =============== keras42_cnn_santander ===========================
 1875/1875 [==============================] - 3s 1ms/step - loss: 0.2874 - acc: 0.9007
 loss :  0.28736522793769836
@@ -222,15 +229,4 @@ acc :  0.9
 ============================================================
 acc_score :  0.90075
 걸린시간 :  743.27 sec
-'''
-
-
-
-
-
-
-
-
-
-
-
+"""

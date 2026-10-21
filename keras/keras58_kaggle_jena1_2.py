@@ -1,4 +1,4 @@
-'''
+"""
 2026-09-29
 
 https://www.kaggle.com/datasets/stytch16/jena-climate-2009-2016/data
@@ -7,34 +7,29 @@ x = (n, 144, 13)
 y = (n, 144, 1)
 
 2016-12-31 00:00 ~ 2017-01-01 00:00의 wd(풍향)을 맞춰보자
-'''
+"""
+
+import time
 
 import numpy as np
 import pandas as pd
-import time
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.optimizers import Adam
-
+from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error
-
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import Adam
 
 # ============================================================
 # 1. 데이터
 # ============================================================
 
-path = './_data/kaggle_jena/'
+path = "./_data/kaggle_jena/"
 
-datasets = pd.read_csv(
-    path + 'jena_climate_2009_2016.csv',
-    index_col=0
-)
+datasets = pd.read_csv(path + "jena_climate_2009_2016.csv", index_col=0)
 
-print('datasets.shape :', datasets.shape)
+print("datasets.shape :", datasets.shape)
 # (420551, 14)
 
 
@@ -43,9 +38,9 @@ print('datasets.shape :', datasets.shape)
 # 마지막 144개의 wd(풍향)
 # ------------------------------------------------------------
 
-y_cor = datasets[-144:]['T (degC)']
+y_cor = datasets[-144:]["T (degC)"]
 
-print('y_cor.shape :', y_cor.shape)
+print("y_cor.shape :", y_cor.shape)
 # (144,)
 
 
@@ -54,12 +49,9 @@ print('y_cor.shape :', y_cor.shape)
 # 마지막 하루 바로 전 144개
 # ------------------------------------------------------------
 
-x_predict = datasets[-288:-144].drop(
-    ['T (degC)'],
-    axis=1
-)
+x_predict = datasets[-288:-144].drop(["T (degC)"], axis=1)
 
-print('x_predict.shape :', x_predict.shape)
+print("x_predict.shape :", x_predict.shape)
 # (144, 13)
 
 
@@ -71,19 +63,16 @@ start_time = time.time()
 
 
 # x : 현재 144개 데이터를 사용
-x_data = datasets[:-288].drop(
-    ['T (degC)'],
-    axis=1
-)
+x_data = datasets[:-288].drop(["T (degC)"], axis=1)
 
 # y : x보다 144칸 뒤의 wd
-y_data = datasets[144:-144]['T (degC)']
+y_data = datasets[144:-144]["T (degC)"]
 
 
-print('x_data.shape :', x_data.shape)
+print("x_data.shape :", x_data.shape)
 # (420263, 13)
 
-print('y_data.shape :', y_data.shape)
+print("y_data.shape :", y_data.shape)
 # (420263,)
 
 
@@ -95,11 +84,12 @@ size_y = 144
 # 시계열 데이터 자르는 함수
 # ------------------------------------------------------------
 
+
 def split_x(dataset, size):
     aaa = []
 
     for i in range(len(dataset) - size + 1):
-        subset = dataset[i:i+size]
+        subset = dataset[i : i + size]
         aaa.append(subset)
 
     return np.array(aaa)
@@ -116,35 +106,26 @@ y = split_x(y_data, size_y)
 
 end_time = time.time()
 
-print('x.shape :', x.shape)
-print('y.shape :', y.shape)
+print("x.shape :", x.shape)
+print("y.shape :", y.shape)
 
-print(
-    '자르는 시간 :',
-    round(end_time - start_time, 2),
-    'sec'
-)
+print("자르는 시간 :", round(end_time - start_time, 2), "sec")
 
 
 # ============================================================
 # 2. train / test 분리
 # ============================================================
 
-x_train, x_test, y_train, y_test = train_test_split(
-    x,
-    y,
-    test_size=0.2,
-    shuffle=False
-)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=False)
 
 
-print('===== train / test =====')
+print("===== train / test =====")
 
-print('x_train.shape :', x_train.shape)
-print('x_test.shape  :', x_test.shape)
+print("x_train.shape :", x_train.shape)
+print("x_test.shape  :", x_test.shape)
 
-print('y_train.shape :', y_train.shape)
-print('y_test.shape  :', y_test.shape)
+print("y_train.shape :", y_train.shape)
+print("y_test.shape  :", y_test.shape)
 
 
 # ============================================================
@@ -216,18 +197,18 @@ y_test = y_test.reshape(y_test_shape)
 # (n, 144, 1)
 # ------------------------------------------------------------
 
-y_train = y_train.reshape(y_train.shape[0],y_train.shape[1],1)
+y_train = y_train.reshape(y_train.shape[0], y_train.shape[1], 1)
 
-y_test = y_test.reshape(y_test.shape[0],y_test.shape[1],1)
+y_test = y_test.reshape(y_test.shape[0], y_test.shape[1], 1)
 
 
-print('===== scaling 완료 =====')
+print("===== scaling 완료 =====")
 
-print('x_train.shape :', x_train.shape)
-print('x_test.shape  :', x_test.shape)
+print("x_train.shape :", x_train.shape)
+print("x_test.shape  :", x_test.shape)
 
-print('y_train.shape :', y_train.shape)
-print('y_test.shape  :', y_test.shape)
+print("y_train.shape :", y_train.shape)
+print("y_test.shape  :", y_test.shape)
 
 # x_train : (n, 144, 13)
 # y_train : (n, 144, 1)
@@ -246,7 +227,7 @@ x_predict = scaler_x.transform(x_predict)
 x_predict = x_predict.reshape(1, 144, 13)
 
 
-print('x_predict.shape :', x_predict.shape)
+print("x_predict.shape :", x_predict.shape)
 # (1, 144, 13)
 
 
@@ -258,7 +239,7 @@ model = Sequential()
 
 model.add(LSTM(units=32, input_shape=(144, 13), return_sequences=True))
 model.add(LSTM(units=32, return_sequences=True))
-model.add(Dense(32, activation='relu'))
+model.add(Dense(32, activation="relu"))
 model.add(Dense(1))
 
 
@@ -275,35 +256,27 @@ model.summary()
 # 5. 컴파일 / 훈련
 # ============================================================
 
-model.compile(
-    loss='mse', optimizer=Adam(learning_rate=0.001))
+model.compile(loss="mse", optimizer=Adam(learning_rate=0.001))
 
 
 es = EarlyStopping(
-    monitor='val_loss',
-    mode='min',
-    patience=20,
-    verbose=1,
-    restore_best_weights=True
+    monitor="val_loss", mode="min", patience=20, verbose=1, restore_best_weights=True
 )
 
 
 rlr = ReduceLROnPlateau(
-    monitor='val_loss',
-    mode='min',
-    patience=10,
-    factor=0.5,
-    verbose=1
+    monitor="val_loss", mode="min", patience=10, factor=0.5, verbose=1
 )
 
 
 model.fit(
-    x_train,y_train,
+    x_train,
+    y_train,
     epochs=1000,
     batch_size=32,
     shuffle=False,
     verbose=1,
-    callbacks=[es, rlr]
+    callbacks=[es, rlr],
 )
 
 
@@ -311,12 +284,9 @@ model.fit(
 # 6. 평가
 # ============================================================
 
-results = model.evaluate(
-    x_test,
-    y_test
-)
+results = model.evaluate(x_test, y_test)
 
-print('test loss :', results)
+print("test loss :", results)
 
 
 # ============================================================
@@ -326,7 +296,7 @@ print('test loss :', results)
 y_predict = model.predict(x_predict)
 
 
-print('예측 직후 y_predict.shape :')
+print("예측 직후 y_predict.shape :")
 print(y_predict.shape)
 
 # (1, 144, 1)
@@ -338,14 +308,12 @@ print(y_predict.shape)
 
 y_predict = y_predict.reshape(-1, 1)
 
-y_predict = scaler_y.inverse_transform(
-    y_predict
-)
+y_predict = scaler_y.inverse_transform(y_predict)
 
 y_predict = y_predict.reshape(-1)
 
 
-print('최종 y_predict.shape :')
+print("최종 y_predict.shape :")
 print(y_predict.shape)
 
 # (144,)
@@ -355,15 +323,15 @@ print(y_predict.shape)
 # 9. 실제값과 예측값 비교
 # ============================================================
 
-print('========================================')
-print('실제 풍향 144개')
-print('========================================')
+print("========================================")
+print("실제 풍향 144개")
+print("========================================")
 print(y_cor.values)
 
 
-print('========================================')
-print('예측 풍향 144개')
-print('========================================')
+print("========================================")
+print("예측 풍향 144개")
+print("========================================")
 print(y_predict)
 
 
@@ -374,6 +342,6 @@ print(y_predict)
 rmse = np.sqrt(mean_squared_error(y_cor.values, y_predict))
 
 
-print('========================================')
-print('RMSE :', rmse)
-print('========================================')
+print("========================================")
+print("RMSE :", rmse)
+print("========================================")

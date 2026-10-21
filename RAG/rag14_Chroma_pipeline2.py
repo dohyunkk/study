@@ -1,22 +1,22 @@
-'''
+"""
 2026-10-07
 13 카피
 save 데이터를 불러와서 출력값 확인.
-'''
+"""
 
 import os
 
-from langchain_community.document_loaders import TextLoader
-from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
-from langchain_chroma import Chroma
-from langchain_openai import ChatOpenAI
-
 from dotenv import load_dotenv
+from langchain_chroma import Chroma
+from langchain_classic.chains import create_retrieval_chain
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
 load_dotenv()
 
-api_key = os.environ['MONOROUTER_API_KEY'].strip()
-base_url = 'https://monogpt.kr/api/monorouter/v1'
+api_key = os.environ["MONOROUTER_API_KEY"].strip()
+base_url = "https://monogpt.kr/api/monorouter/v1"
 
 
 # 1. 데이터
@@ -24,15 +24,15 @@ base_url = 'https://monogpt.kr/api/monorouter/v1'
 # 2. 데이터 자르기 (청킹)
 
 # 3. 임베딩
-from langchain_openai import OpenAIEmbeddings
+
 embeddings = OpenAIEmbeddings(
-    model = 'text-embedding-3-small',
+    model="text-embedding-3-small",
     api_key=api_key,
     base_url=base_url,
     # dimensions=5,
 )
 
-DB_PATH = './_db/Chroma12/'
+DB_PATH = "./_db/Chroma12/"
 
 # ========================================
 # 불러오기
@@ -40,7 +40,7 @@ DB_PATH = './_db/Chroma12/'
 vector_store = Chroma(
     embedding_function=embeddings,
     persist_directory=DB_PATH,
-    collection_name='chroma12',
+    collection_name="chroma12",
 )
 
 # print(f"벡터 저장소에 저장된 문서 수 : : {vector_store._collection.count()}",)
@@ -49,12 +49,12 @@ vector_store = Chroma(
 query = "반도체에서 눈여겨 봐야할 부분은 무엇인가요?"
 result = vector_store.similarity_search(query)
 
-print(f"검색 결과의 길이 : {len(result)}")              # 4
+print(f"검색 결과의 길이 : {len(result)}")  # 4
 
 ########################### retrievers ############################
 ######################## 검색기(자료찾기) #########################
 
-retriever = vector_store.as_retriever(search_kwargs={"k":2})
+retriever = vector_store.as_retriever(search_kwargs={"k": 2})
 print(retriever)
 # tags=['Chroma', 'OpenAIEmbeddings']
 # vectorstore=<langchain_chroma.vectorstores.Chroma object at 0x000001D94EBD2090> search_kwargs={'k': 2}
@@ -66,10 +66,9 @@ print(retriever)
 
 print("=============================================================================")
 ######################## 모델 연결 #################################
-from langchain_openai import ChatOpenAI
 
 model = ChatOpenAI(
-    model = 'gpt-6-luna',
+    model="gpt-6-luna",
     temperature=0,
     max_tokens=1000,
     api_key=api_key,
@@ -93,9 +92,6 @@ print("=========================================================================
 # response = model.invoke(query_with_context)
 # print("model의 대답 :",response.content)
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-from langchain_classic.chains import create_retrieval_chain
 
 prompt = ChatPromptTemplate.from_template("""
 다음 컨텍스트를 바탕으로 질문에 답변해 주세요. 컨텍스트 관련 정보가 없다면,
@@ -107,22 +103,24 @@ prompt = ChatPromptTemplate.from_template("""
 """)
 
 # 체인 만들기
-docu_chain = create_stuff_documents_chain(model, prompt)   # prompt | model  = 검색된 문서들을 LLM에게 넣어서 답변을 만들게 하는 체인
+docu_chain = create_stuff_documents_chain(
+    model, prompt
+)  # prompt | model  = 검색된 문서들을 LLM에게 넣어서 답변을 만들게 하는 체인
 rag_chain = create_retrieval_chain(retriever, docu_chain)  # 검색 | docu_chain
 
 # 체인 실행
 query = "삼성전자의 창업자는 누구인가요?"
-response = rag_chain.invoke({"input" : query})
+response = rag_chain.invoke({"input": query})
 
-print('response :')
+print("response :")
 print(response)
 print(" [ keys() ] ==============================================")
 print(response.keys())
 # dict_keys(['input', 'context', 'answer'])
 print(" [ context ] ============================================")
-print(response['context'][0].page_content)
+print(response["context"][0].page_content)
 print(" [ answer ] =============================================")
-print(response['answer']) # 주어진 정보로는 답변할 수 없습니다.
+print(response["answer"])  # 주어진 정보로는 답변할 수 없습니다.
 
 """
 tags=['Chroma', 'OpenAIEmbeddings'] vectorstore=<langchain_chroma.vectorstores.Chroma object at 0x00000117A05EEA50> search_kwargs={'k': 2}

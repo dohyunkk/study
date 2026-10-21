@@ -1,23 +1,21 @@
-'''
+"""
 53 카피
-'''
+"""
+
+import time
 
 import numpy as np
 import pandas as pd
-import time
-
-from sklearn.metrics import mean_squared_error
+from sklearn.datasets import load_wine
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.layers import Dense, LSTM, Conv1D, Flatten, Reshape
-from tensorflow.keras.layers import GlobalAveragePooling1D, Dropout, MaxPool1D
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.layers import Conv1D, Dense, Flatten, MaxPool1D, Reshape
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-from sklearn.datasets import load_wine
-
-
-#1. 데이터
+# 1. 데이터
 datasets = load_wine()
 
 # print(datasets)
@@ -63,11 +61,12 @@ y = pd.get_dummies(y, dtype=int)
 # exit()
 # train_test 분리
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.7,
-    random_state = 5252,
-    stratify = y,
-    shuffle = True,
+    x,
+    y,
+    train_size=0.7,
+    random_state=5252,
+    stratify=y,
+    shuffle=True,
 )
 
 # print(x_train.shape, x_test.shape)
@@ -75,7 +74,6 @@ x_train, x_test, y_train, y_test = train_test_split(
 # print(y_train.shape, y_test.shape)
 # (124, 3) (54, 3)
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -98,82 +96,83 @@ print(np.min(x_test), np.max(x_test))
 
 # exit()
 
-#2. 모델
+# 2. 모델
 model = Sequential()
-model.add(Reshape(target_shape=(13, 1), input_shape=(13, )))
+model.add(Reshape(target_shape=(13, 1), input_shape=(13,)))
 
-model.add(Conv1D(filters=32, kernel_size=2, padding='same',input_shape=(13, 1)))
+model.add(Conv1D(filters=32, kernel_size=2, padding="same", input_shape=(13, 1)))
 
-model.add(Conv1D(64, 2, padding='same'))
+model.add(Conv1D(64, 2, padding="same"))
 # model.add(MaxPool1D())
 
 model.add(Conv1D(128, 2))
 model.add(MaxPool1D())
 
-model.add(Conv1D(256, 2, padding='same'))
+model.add(Conv1D(256, 2, padding="same"))
 model.add(MaxPool1D())
 
 # model.add(GlobalAveragePooling1D())
 model.add(Flatten())
 
-model.add(Dense(128, activation='relu'))
-model.add(Dense(64, activation='relu'))
-model.add(Dense(3, activation = 'softmax'))
+model.add(Dense(128, activation="relu"))
+model.add(Dense(64, activation="relu"))
+model.add(Dense(3, activation="softmax"))
 
 model.summary()
 # exit()
-#3. 컴파일, 훈련
-from tensorflow.keras.optimizers import Adam
+# 3. 컴파일, 훈련
 
 # learning_rate = 0.01
-learning_rate = 0.001   # 디폴트값
+learning_rate = 0.001  # 디폴트값
 # learning_rate = 0.0001
 # learning_rate = 0.005
 # learning_rate = 0.05
 # learning_rate = 0.009
 
-model.compile(loss='categorical_crossentropy',
-              optimizer = Adam(learning_rate=learning_rate),
-              metrics=['acc'],
-              )
+model.compile(
+    loss="categorical_crossentropy",
+    optimizer=Adam(learning_rate=learning_rate),
+    metrics=["acc"],
+)
 
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
-es = EarlyStopping(         
-    monitor = 'val_loss',        
-    mode = 'auto',                 
-    patience = 40,                
-    verbose = 1,
-    restore_best_weights = True,  
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="auto",
+    patience=40,
+    verbose=1,
+    restore_best_weights=True,
 )
 
 rlr = ReduceLROnPlateau(
-    monitor='val_loss',
-    mode='auto',
+    monitor="val_loss",
+    mode="auto",
     patience=10,
-    verbose=1, 
+    verbose=1,
     factor=0.5,
 )
 
 start_time = time.time()
 
-model.fit(x_train, y_train,
-          epochs = 1000,
-          batch_size = 64,
-          verbose = 1,
-          validation_split = 0.2,
-          callbacks = [es, rlr],
-          )
+model.fit(
+    x_train,
+    y_train,
+    epochs=1000,
+    batch_size=64,
+    verbose=1,
+    validation_split=0.2,
+    callbacks=[es, rlr],
+)
 
 end_time = time.time()
 
-#.4 평가, 예측
+# .4 평가, 예측
 
 print("==================== keras68_Conv1D_wine =========================")
 
 result = model.evaluate(x_test, y_test)
-print('loss : ', result[0])
-print('acc : ', round(result[1],2))
+print("loss : ", result[0])
+print("acc : ", round(result[1], 2))
 
 y_predict = model.predict(x_test)
 
@@ -196,13 +195,13 @@ y_test = np.argmax(y_test, axis=1)
 # [2 0 2 2 1 0 2 1 0 0 1 0 2 0 0 1 1 1 1 0 0 1 1 0 2 1 2 1 0 0 1 2 1 1 0 1 2
 #  0 0 1 1 2 2 2 2 0 0 0 1 1 1 2 2 1]
 
-from sklearn.metrics import accuracy_score
+
 accuracy_score = accuracy_score(y_test, y_predict)
-print('acc_score : ', accuracy_score)
-print('걸린시간 : ', round(end_time - start_time, 2),'sec')
+print("acc_score : ", accuracy_score)
+print("걸린시간 : ", round(end_time - start_time, 2), "sec")
 
 
-'''
+"""
 RobustScaler
 
 Epoch 53/1000
@@ -233,4 +232,4 @@ acc :  0.98
 2/2 [==============================] - 0s 0s/step
 acc_score :  0.9814814814814815
 걸린시간 :  4.46 sec
-'''
+"""

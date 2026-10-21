@@ -1,12 +1,12 @@
 # 16_2 카피
+import numpy as np
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
-from sklearn.model_selection import train_test_split
-import numpy as np
 
-#1. 데이터
-x = np.array(range(1,17))
-y = np.array(range(1,17))
+# 1. 데이터
+x = np.array(range(1, 17))
+y = np.array(range(1, 17))
 """
 # 실습 8개, 4개, 4개 잘라봅시다
 
@@ -26,22 +26,24 @@ y_test = y[12:]
 # )
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
+    x,
+    y,
     #   train_size=0.75,
     #   test_size=0.25,
     #  shuffle=True,          #디폴트 설정값 = 섞는다.
-      random_state=99,   #랜덤 난수표 중 고정값을 넣어 고정된 리턴을 뽑아낸다.
+    random_state=99,  # 랜덤 난수표 중 고정값을 넣어 고정된 리턴을 뽑아낸다.
 )
 x_train, x_val, y_train, y_val = train_test_split(
-    x_train, y_train,
+    x_train,
+    y_train,
     #   train_size=0.75,
     #   test_size=0.25,
     #  shuffle=True,          #디폴트 설정값 = 섞는다.
-      random_state=99,   #랜덤 난수표 중 고정값을 넣어 고정된 리턴을 뽑아낸다.
+    random_state=99,  # 랜덤 난수표 중 고정값을 넣어 고정된 리턴을 뽑아낸다.
 )
 
-print(x_train.shape, x_val.shape, x_test.shape) #(9,) (3,) (4,)
-print(y_train.shape, y_val.shape, y_test.shape) #(9,) (3,) (4,)
+print(x_train.shape, x_val.shape, x_test.shape)  # (9,) (3,) (4,)
+print(y_train.shape, y_val.shape, y_test.shape)  # (9,) (3,) (4,)
 
 """
 x_train, x_test, y_train, y_test = train_test_split(
@@ -61,22 +63,24 @@ model.add(Dense(8))
 model.add(Dense(1))
 
 
-#3. 컴파일, 훈련
-model.compile(loss='mse', optimizer='adam')
-model.fit(x_train, y_train, epochs=250, batch_size=6,
-          verbose = 1,
-          validation_data = (x_val, y_val),
-          )
+# 3. 컴파일, 훈련
+model.compile(loss="mse", optimizer="adam")
+model.fit(
+    x_train,
+    y_train,
+    epochs=250,
+    batch_size=6,
+    verbose=1,
+    validation_data=(x_val, y_val),
+)
 
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ' , loss)
+print("loss : ", loss)
 
 """
 - loss: 0.0026 - val_loss: 0.0049
 loss :  0.003999218810349703
 
 """
-
-

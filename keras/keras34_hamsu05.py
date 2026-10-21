@@ -1,50 +1,54 @@
-'''
+"""
 2026-09-14 (월)
 
 # https://www.kaggle.com/competitions/bike-sharing-demand/data
-'''
+"""
+
+import time
 
 import numpy as np
 import pandas as pd
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
-import time
-#1. 데이터
-path = "./_data/kaggle_bike/"   # 상대경로
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dense, Dropout, Input
+from tensorflow.keras.models import Model
+
+# 1. 데이터
+path = "./_data/kaggle_bike/"  # 상대경로
 
 train_csv = pd.read_csv(path + "train.csv", index_col=0)
-#print(train_csv.shape) # (10886, 11)
+# print(train_csv.shape) # (10886, 11)
 test_csv = pd.read_csv(path + "test.csv", index_col=0)
-#print(test_csv.shape) #(6493, 8)
+# print(test_csv.shape) #(6493, 8)
 submission = pd.read_csv(path + "sampleSubmission.csv", index_col=0)
-#print(submission.shape) #(6493, 1)
+# print(submission.shape) #(6493, 1)
 
-#print(train_csv.info())
-#print(test_csv.info())
+# print(train_csv.info())
+# print(test_csv.info())
 
-#print(train_csv.describe())
+# print(train_csv.describe())
 
 ########결측치 확인 ###############
 
-#print(train_csv.isna().sum())   # 결손치 확인 코드
-#print(test_csv.isnull().sum())  # 결손치 확인 코드
+# print(train_csv.isna().sum())   # 결손치 확인 코드
+# print(test_csv.isnull().sum())  # 결손치 확인 코드
 
 # exit()
 ########### x , y 분리 ##########
-x = train_csv.drop(['casual', 'registered', 'count'], axis=1)
+x = train_csv.drop(["casual", "registered", "count"], axis=1)
 # print(x) #  [10886 rows x 8 columns]
-y = train_csv['count']
+y = train_csv["count"]
 # print(y)
 # print(y.shape) # (10886,)
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
+    x,
+    y,
     random_state=2414,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -70,11 +74,9 @@ print(np.min(x_test), np.max(x_test))
 
 # 2. 모델 구성
 
-from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.layers import Dense, Dropout, Input
 
 # model = Sequential()
-# model.add(Dense(16, activation='relu', input_shape=(8,)))    
+# model.add(Dense(16, activation='relu', input_shape=(8,)))
 # model.add(Dropout(0.3))
 # model.add(Dense(16, activation='relu'))
 # model.add(Dense(8, activation='relu'))
@@ -83,10 +85,10 @@ from tensorflow.keras.layers import Dense, Dropout, Input
 # model.summary()
 
 input1 = Input(shape=(8,))
-dense1 = Dense(16, activation='relu')(input1)
+dense1 = Dense(16, activation="relu")(input1)
 drop1 = Dropout(0.3)(dense1)
-dense2 = Dense(16, activation='relu')(drop1)
-dense3 = Dense(8, activation='relu')(dense2)
+dense2 = Dense(16, activation="relu")(drop1)
+dense3 = Dense(8, activation="relu")(dense2)
 output1 = Dense(1)(dense3)
 
 model = Model(inputs=input1, outputs=output1)
@@ -95,17 +97,17 @@ model = Model(inputs=input1, outputs=output1)
 # exit()
 
 # 3. 컴파일, 훈련
-model.compile(loss='mse', optimizer='adam')
+model.compile(loss="mse", optimizer="adam")
 
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(               
-    monitor = 'val_loss',         
-    mode = 'min',                 
-    patience = 30,                
-    restore_best_weights = True,  
+
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="min",
+    patience=30,
+    restore_best_weights=True,
 )
 
-#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+# ★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -132,37 +134,42 @@ es = EarlyStopping(
 #     verbose = 1,
 # )
 
-start_time = time.time()     
+start_time = time.time()
 
-hist = model.fit(x_train, y_train, 
-                 epochs=50000,
-                 batch_size=32, 
-                 validation_split=0.2,
-                 callbacks=[es, ]# mcp],
-                 )
+hist = model.fit(
+    x_train,
+    y_train,
+    epochs=50000,
+    batch_size=32,
+    validation_split=0.2,
+    callbacks=[
+        es,
+    ],  # mcp],
+)
 
-end_time = time.time()   
+end_time = time.time()
 
 print("====================keras34_kaggle_bike==============================")
 
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
 # 평가(보조)지표-R2
 y_predict = model.predict(x_test)
-from sklearn.metrics import r2_score
 
 r2 = r2_score(y_test, y_predict)
-print("r2 = : ", r2 )
+print("r2 = : ", r2)
 
 mse = mean_squared_error(y_test, y_predict)
-print('mse : ', mse)
+print("mse : ", mse)
 
-#RMSE함수의 정의
+
+# RMSE함수의 정의
 def RMSE(y_tset, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
+
 
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
@@ -178,7 +185,7 @@ print("RMSE : ", rmse)
 
 # submission.to_csv(path + "submit/" + "submit_0907_1014.csv")
 
-print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2), "sec")
 
 # print("============================ history =================================")
 # print(hist)
@@ -208,8 +215,7 @@ print("훈련시간 :", round(end_time - start_time, 2),"sec")
 # plt.show()    #
 
 
-
-'''
+"""
 
 ====================keras31_kaggle_bike==============================
 86/86 ━━━━━━━━━━━━━━━━━━━━ 0s 690us/step - loss: 22389.6914
@@ -237,4 +243,4 @@ r2 = :  0.29145514965057373
 mse :  23962.83984375
 RMSE :  154.7993534991345
 훈련시간 : 16.1 sec
-'''
+"""

@@ -2,48 +2,39 @@
 # 앙상블 쓸 것
 # LSTM Con1D 쓸것
 
-import os
-import time
 import numpy as np
 import pandas as pd
-
-from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import (
-    Input, LSTM, Conv1D, Flatten, Dense, Dropout, Concatenate
-)
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import load_model
 
 # ============================================================
 # 1. 데이터 불러오기
 # ============================================================
 
-path = 'c:/study/_data/samsung/'
+path = "c:/study/_data/samsung/"
 
 samsung = pd.read_csv(
-    path + '삼성전자261012.csv',
+    path + "삼성전자261012.csv",
     index_col=0,
-    encoding='cp949',
+    encoding="cp949",
 )
 
 amore = pd.read_csv(
-    path + '아모레261012.csv',
+    path + "아모레261012.csv",
     index_col=0,
-    encoding='cp949',
+    encoding="cp949",
 )
 
 hynix = pd.read_csv(
-    path + '하이닉스261012.csv',
+    path + "하이닉스261012.csv",
     index_col=0,
-    encoding='cp949',
+    encoding="cp949",
 )
 
-print('samsung:', samsung.shape)
-print('amore:', amore.shape)
-print('hynix:', hynix.shape)
+print("samsung:", samsung.shape)
+print("amore:", amore.shape)
+print("hynix:", hynix.shape)
 
 
 # ============================================================
@@ -51,9 +42,9 @@ print('hynix:', hynix.shape)
 # ============================================================
 
 # 오래된 날짜부터 정렬
-samsung.index = pd.to_datetime(samsung.index, errors='coerce')
-amore.index = pd.to_datetime(amore.index, errors='coerce')
-hynix.index = pd.to_datetime(hynix.index, errors='coerce')
+samsung.index = pd.to_datetime(samsung.index, errors="coerce")
+amore.index = pd.to_datetime(amore.index, errors="coerce")
+hynix.index = pd.to_datetime(hynix.index, errors="coerce")
 
 samsung = samsung.loc[~samsung.index.isna()].sort_index()
 amore = amore.loc[~amore.index.isna()].sort_index()
@@ -61,7 +52,7 @@ hynix = hynix.loc[~hynix.index.isna()].sort_index()
 
 
 # 아모레와 하이닉스에서 사용할 컬럼 6개
-feature_cols = ['시가', '고가', '저가', '종가', '등락률', '거래량']
+feature_cols = ["시가", "고가", "저가", "종가", "등락률", "거래량"]
 
 # 필요한 컬럼만 각각 따로 선택
 amore_data = amore[feature_cols].copy()
@@ -72,19 +63,19 @@ hynix_data = hynix[feature_cols].copy()
 # 예: '260,000' -> 260000
 for col in feature_cols:
     amore_data[col] = pd.to_numeric(
-        amore_data[col].astype(str).str.replace(',', '', regex=False),
-        errors='coerce',
+        amore_data[col].astype(str).str.replace(",", "", regex=False),
+        errors="coerce",
     )
 
     hynix_data[col] = pd.to_numeric(
-        hynix_data[col].astype(str).str.replace(',', '', regex=False),
-        errors='coerce',
+        hynix_data[col].astype(str).str.replace(",", "", regex=False),
+        errors="coerce",
     )
 
 # 정답으로 사용할 삼성전자 시가도 숫자로 변경
-samsung['시가'] = pd.to_numeric(
-    samsung['시가'].astype(str).str.replace(',', '', regex=False),
-    errors='coerce',
+samsung["시가"] = pd.to_numeric(
+    samsung["시가"].astype(str).str.replace(",", "", regex=False),
+    errors="coerce",
 )
 
 # 결측값이 있는 행 제거
@@ -98,7 +89,7 @@ common_dates = common_dates.intersection(samsung.index)
 common_dates = common_dates.sort_values()
 
 # 각 날짜의 다음 거래일 삼성전자 시가
-samsung_next_open = samsung['시가'].shift(-1)
+samsung_next_open = samsung["시가"].shift(-1)
 
 
 # ============================================================
@@ -112,7 +103,7 @@ hynix_x = []
 samsung_y = []
 
 for i in range(size - 1, len(common_dates)):
-    dates_60 = common_dates[i - size + 1:i + 1]
+    dates_60 = common_dates[i - size + 1 : i + 1]
     today = common_dates[i]
 
     # 다음 거래일 삼성전자 시가가 없으면 건너뜀
@@ -120,13 +111,9 @@ for i in range(size - 1, len(common_dates)):
         continue
 
     # 아모레와 하이닉스 데이터는 각각 별도로 보관
-    amore_x.append(
-        amore_data.loc[dates_60, feature_cols].to_numpy()
-    )
+    amore_x.append(amore_data.loc[dates_60, feature_cols].to_numpy())
 
-    hynix_x.append(
-        hynix_data.loc[dates_60, feature_cols].to_numpy()
-    )
+    hynix_x.append(hynix_data.loc[dates_60, feature_cols].to_numpy())
 
     # 정답은 다음 거래일 삼성전자 시가
     samsung_y.append(samsung_next_open.loc[today])
@@ -136,9 +123,9 @@ amore_x = np.array(amore_x, dtype=np.float32)
 hynix_x = np.array(hynix_x, dtype=np.float32)
 samsung_y = np.array(samsung_y, dtype=np.float32).reshape(-1, 1)
 
-print('amore_x:', amore_x.shape)       # (샘플 수, 60, 6)
-print('hynix_x:', hynix_x.shape)       # (샘플 수, 60, 6)
-print('samsung_y:', samsung_y.shape)   # (샘플 수, 1)
+print("amore_x:", amore_x.shape)  # (샘플 수, 60, 6)
+print("hynix_x:", hynix_x.shape)  # (샘플 수, 60, 6)
+print("samsung_y:", samsung_y.shape)  # (샘플 수, 1)
 
 
 # ============================================================
@@ -161,9 +148,9 @@ samsung_train = samsung_y[:train_end]
 samsung_val = samsung_y[train_end:val_end]
 samsung_test = samsung_y[val_end:]
 
-print('학습:', amore_train.shape, hynix_train.shape, samsung_train.shape)
-print('검증:', amore_val.shape, hynix_val.shape, samsung_val.shape)
-print('테스트:', amore_test.shape, hynix_test.shape, samsung_test.shape)
+print("학습:", amore_train.shape, hynix_train.shape, samsung_train.shape)
+print("검증:", amore_val.shape, hynix_val.shape, samsung_val.shape)
+print("테스트:", amore_test.shape, hynix_test.shape, samsung_test.shape)
 
 
 # ============================================================
@@ -179,17 +166,23 @@ amore_test_shape = amore_test.shape
 
 scaler_amore = StandardScaler()
 
-amore_train = scaler_amore.fit_transform(
-    amore_train.reshape(-1, num_features)
-).reshape(amore_train_shape).astype(np.float32)
+amore_train = (
+    scaler_amore.fit_transform(amore_train.reshape(-1, num_features))
+    .reshape(amore_train_shape)
+    .astype(np.float32)
+)
 
-amore_val = scaler_amore.transform(
-    amore_val.reshape(-1, num_features)
-).reshape(amore_val_shape).astype(np.float32)
+amore_val = (
+    scaler_amore.transform(amore_val.reshape(-1, num_features))
+    .reshape(amore_val_shape)
+    .astype(np.float32)
+)
 
-amore_test = scaler_amore.transform(
-    amore_test.reshape(-1, num_features)
-).reshape(amore_test_shape).astype(np.float32)
+amore_test = (
+    scaler_amore.transform(amore_test.reshape(-1, num_features))
+    .reshape(amore_test_shape)
+    .astype(np.float32)
+)
 
 
 # 하이닉스 입력 스케일링
@@ -199,17 +192,23 @@ hynix_test_shape = hynix_test.shape
 
 scaler_hynix = StandardScaler()
 
-hynix_train = scaler_hynix.fit_transform(
-    hynix_train.reshape(-1, num_features)
-).reshape(hynix_train_shape).astype(np.float32)
+hynix_train = (
+    scaler_hynix.fit_transform(hynix_train.reshape(-1, num_features))
+    .reshape(hynix_train_shape)
+    .astype(np.float32)
+)
 
-hynix_val = scaler_hynix.transform(
-    hynix_val.reshape(-1, num_features)
-).reshape(hynix_val_shape).astype(np.float32)
+hynix_val = (
+    scaler_hynix.transform(hynix_val.reshape(-1, num_features))
+    .reshape(hynix_val_shape)
+    .astype(np.float32)
+)
 
-hynix_test = scaler_hynix.transform(
-    hynix_test.reshape(-1, num_features)
-).reshape(hynix_test_shape).astype(np.float32)
+hynix_test = (
+    scaler_hynix.transform(hynix_test.reshape(-1, num_features))
+    .reshape(hynix_test_shape)
+    .astype(np.float32)
+)
 
 
 # 삼성전자 시가 정답 스케일링
@@ -234,7 +233,7 @@ sample_weight = np.linspace(
     len(samsung_train),
 ).astype(np.float32)
 
-print('학습 샘플 가중치:', sample_weight[0], '~', sample_weight[-1])
+print("학습 샘플 가중치:", sample_weight[0], "~", sample_weight[-1])
 
 
 # ============================================================
@@ -284,8 +283,8 @@ print('학습 샘플 가중치:', sample_weight[0], '~', sample_weight[-1])
 
 # model.summary()
 
-from tensorflow.keras.models import load_model
-model= load_model('./save/keras70/'+'model.keras')
+
+model = load_model("./save/keras70/" + "model.keras")
 # ============================================================
 # 8. 컴파일 및 훈련
 # ============================================================
@@ -347,17 +346,15 @@ model= load_model('./save/keras70/'+'model.keras')
 y_predict_scaled = model.predict([amore_test, hynix_test])
 
 # 예측값을 실제 삼성전자 시가 단위로 되돌림
-y_predict = scaler_y.inverse_transform(
-    y_predict_scaled
-).reshape(-1)
+y_predict = scaler_y.inverse_transform(y_predict_scaled).reshape(-1)
 
 samsung_test_original = samsung_test_original.reshape(-1)
 
 mae = mean_absolute_error(samsung_test_original, y_predict)
 rmse = np.sqrt(mean_squared_error(samsung_test_original, y_predict))
 
-print('테스트 MAE:', round(mae, 2))
-print('테스트 RMSE:', round(rmse, 2))
+print("테스트 MAE:", round(mae, 2))
+print("테스트 RMSE:", round(rmse, 2))
 
 
 # ============================================================
@@ -366,36 +363,31 @@ print('테스트 RMSE:', round(rmse, 2))
 
 latest_dates = common_dates[-size:]
 
-latest_amore = amore_data.loc[
-    latest_dates, feature_cols
-].to_numpy(dtype=np.float32)
+latest_amore = amore_data.loc[latest_dates, feature_cols].to_numpy(dtype=np.float32)
 
-latest_hynix = hynix_data.loc[
-    latest_dates, feature_cols
-].to_numpy(dtype=np.float32)
+latest_hynix = hynix_data.loc[latest_dates, feature_cols].to_numpy(dtype=np.float32)
 
-latest_amore = scaler_amore.transform(
-    latest_amore.reshape(-1, num_features)
-).reshape(1, size, num_features).astype(np.float32)
-
-latest_hynix = scaler_hynix.transform(
-    latest_hynix.reshape(-1, num_features)
-).reshape(1, size, num_features).astype(np.float32)
-
-latest_predict_scaled = model.predict(
-    [latest_amore, latest_hynix]
+latest_amore = (
+    scaler_amore.transform(latest_amore.reshape(-1, num_features))
+    .reshape(1, size, num_features)
+    .astype(np.float32)
 )
 
-latest_predict = scaler_y.inverse_transform(
-    latest_predict_scaled
-)[0, 0]
+latest_hynix = (
+    scaler_hynix.transform(latest_hynix.reshape(-1, num_features))
+    .reshape(1, size, num_features)
+    .astype(np.float32)
+)
 
-print('마지막 입력 날짜:', latest_dates[-1].strftime('%Y-%m-%d'))
-print('다음 거래일 삼성전자 시가 예측:', round(float(latest_predict), 2))
+latest_predict_scaled = model.predict([latest_amore, latest_hynix])
+
+latest_predict = scaler_y.inverse_transform(latest_predict_scaled)[0, 0]
+
+print("마지막 입력 날짜:", latest_dates[-1].strftime("%Y-%m-%d"))
+print("다음 거래일 삼성전자 시가 예측:", round(float(latest_predict), 2))
 
 
-
-'''
+"""
 Epoch 65: val_loss did not improve from 0.06886
 32/32 [==============================] - 0s 10ms/step - loss: 0.1612 - mae: 0.1728 - val_loss: 0.4589 - val_mae: 0.6282
 Epoch 65: early stopping
@@ -406,4 +398,4 @@ Epoch 65: early stopping
 1/1 [==============================] - 0s 34ms/step
 마지막 입력 날짜: 2026-10-12
 다음 거래일 삼성전자 시가 예측: 252504.69
-'''
+"""

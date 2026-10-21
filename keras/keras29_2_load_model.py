@@ -1,4 +1,4 @@
-'''
+"""
 2026-09-11 (금)
 keras29_1  카피
 
@@ -15,40 +15,42 @@ model = load_model(path + 'keras29_1_save_model.keras')
 1. #2 모델만 가져올래.
 2. #3 컴파일, 훈련까지 가져올래.
 
-'''
+"""
 
-import numpy as np
-import pandas as pd
 import time
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
+
+import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.datasets import fetch_california_housing
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Sequential, load_model
 
 # from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
-#1. 데이터
+# 1. 데이터
 datasets = fetch_california_housing()
 
 x = datasets.data
 y = datasets.target
 
 
-# print(x.shape, y.shape) 
+# print(x.shape, y.shape)
 # (20640, 8) (20640,)
 
 
-
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.75,
+    x,
+    y,
+    train_size=0.75,
     # test_size = 0.25,
     # shuffle = True
     random_state=20260910,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -86,60 +88,63 @@ print(np.min(x_test), np.max(x_test))
 
 # model.summary()
 
-path = './_save/keras29/'
+path = "./_save/keras29/"
 # model.save(path + 'keras29_1_save_model.keras')
-model = load_model(path + 'keras29_1_save_model.keras')
+model = load_model(path + "keras29_1_save_model.keras")
 
 # model.summary()
 
 # exit()
 
 # 3. 컴파일, 훈련
-model.compile(loss='mse', optimizer='adam')
+model.compile(loss="mse", optimizer="adam")
 
-from tensorflow.keras.callbacks import EarlyStopping
-es = EarlyStopping(              
-    monitor = 'val_loss',        
-    mode = 'min',                 
-    patience = 30,                
-    restore_best_weights = True,  
+
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="min",
+    patience=30,
+    restore_best_weights=True,
 )
 
 
-start_time = time.time()    
-hist = model.fit(x_train, y_train, 
-                 epochs=50000,
-                 batch_size=600, 
-                 validation_split=0.2,
-                 callbacks=[es],
-                 )
-end_time = time.time()      
+start_time = time.time()
+hist = model.fit(
+    x_train,
+    y_train,
+    epochs=50000,
+    batch_size=600,
+    validation_split=0.2,
+    callbacks=[es],
+)
+end_time = time.time()
 
 print("===================keras29_california==========================")
 
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
 # 평가(보조)지표-R2
 y_predict = model.predict(x_test)
-from sklearn.metrics import r2_score
 
 r2 = r2_score(y_test, y_predict)
-print("r2 = : ", r2 )
+print("r2 = : ", r2)
 
 mse = mean_squared_error(y_test, y_predict)
-print('mse : ', mse)
+print("mse : ", mse)
 
-#RMSE함수의 정의
+
+# RMSE함수의 정의
 def RMSE(y_tset, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
+
 
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
 
-print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2), "sec")
 
 # print("============================ history =================================")
 # print(hist)
@@ -151,26 +156,31 @@ print("훈련시간 :", round(end_time - start_time, 2),"sec")
 # print(hist.history['val_loss'])
 # print("============================ history =================================")
 
-import matplotlib.pyplot as plt
 
 # print(plt.rcParams['font.family'])         # 그래프 출력시 ['sans-serif']폰트 가 디폴트이기 때문에 한글이 출력되지 않는다.
 
-plt.rcParams['font.family'] = 'Malgun Gothic'   # 그래서 맷플롯립 폰트를 한글을 지원하는 폰트로 삽입하여 그래프에 한글이 표시되도록 한다.
+plt.rcParams["font.family"] = (
+    "Malgun Gothic"  # 그래서 맷플롯립 폰트를 한글을 지원하는 폰트로 삽입하여 그래프에 한글이 표시되도록 한다.
+)
 
-plt.figure(figsize=(9,6))
-plt.plot(hist.history['loss'][1:], c='red', label='loss',)   #y값만 넣으면 시간순으로 그려줌.
-plt.plot(hist.history['val_loss'][1:], c='blue', label='val_loss')
-plt.legend(loc='upper right')    # 우측 상단에 라벨표시
-plt.title('캘리포니아 Loss')
-plt.xlabel('epochs')
+plt.figure(figsize=(9, 6))
+plt.plot(
+    hist.history["loss"][1:],
+    c="red",
+    label="loss",
+)  # y값만 넣으면 시간순으로 그려줌.
+plt.plot(hist.history["val_loss"][1:], c="blue", label="val_loss")
+plt.legend(loc="upper right")  # 우측 상단에 라벨표시
+plt.title("캘리포니아 Loss")
+plt.xlabel("epochs")
 
-plt.ylabel('loss')
+plt.ylabel("loss")
 
-plt.grid()    
-plt.show()    
+plt.grid()
+plt.show()
 
 # exit()
-'''
+"""
 ########### submission.csv 만들기 // count 컬럼에 값 넣어주기 #################
 print(submission) #[715 rows x 1 columns]
 y_submit = model.predict(test_csv)
@@ -180,9 +190,9 @@ print(submission) # [715 rows x 1 columns]
 print(submission.shape)  # (715, 1)
 
 submission.to_csv(path + "submit/" + "submit_0907_1014.csv")
-'''
+"""
 
-'''
+"""
 ===============================================
 1차 시기
 random : 14
@@ -251,12 +261,10 @@ mse :  0.7861366521151975
 RMSE :  0.8866434752002619
 훈련시간 : 16.15 sec
 
-'''
+"""
 
 
-
-
-'''
+"""
 2026-09-10 (목)
 keras19_1  카피
 #1. 데이터
@@ -278,39 +286,31 @@ RobustScaler : 데이터의 중앙값 = 0, IQR = 1이 되도록 스케일링하�
 이상치에 강한 Scaler
 from sklearn.preprocessing import MinMaxScaler
 
-'''
+"""
 
-import numpy as np
-import pandas as pd
-import time
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
-from sklearn.datasets import fetch_california_housing
 
 # from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler
 
-#1. 데이터
+# 1. 데이터
 datasets = fetch_california_housing()
 
 x = datasets.data
 y = datasets.target
 
 
-# print(x.shape, y.shape) 
+# print(x.shape, y.shape)
 # (20640, 8) (20640,)
 
 
-
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.75,
+    x,
+    y,
+    train_size=0.75,
     # test_size = 0.25,
     # shuffle = True
     random_state=20260910,
 )
-'''
+"""
 scaler.fit 은 x_train으로 한다.
 MinMaxScaler의 기준은 train이다.
 test 데이터는 train 데이터에 종속되면 안 된다.
@@ -320,8 +320,7 @@ scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
-'''
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
+"""
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -347,7 +346,7 @@ print(np.min(x_test), np.max(x_test))
 
 # 2. 모델 구성
 model = Sequential()
-model.add(Dense(128, input_shape=(8,)))    # input_dim = 8  -> input_shape = (8, )
+model.add(Dense(128, input_shape=(8,)))  # input_dim = 8  -> input_shape = (8, )
 model.add(Dense(256))
 model.add(Dense(512))
 model.add(Dense(256))
@@ -358,51 +357,54 @@ model.add(Dense(1))
 
 
 # 3. 컴파일, 훈련
-model.compile(loss='mse', optimizer='adam')
+model.compile(loss="mse", optimizer="adam")
 
-from tensorflow.keras.callbacks import EarlyStopping
-es = EarlyStopping(               # 최소 혹은 최대값을 구해주는 코드 (if문으로 구성되어있는 조건문)
-    monitor = 'val_loss',         # 모니터링 할게
-    mode = 'min',                 # 최소점
-    patience = 30,                # patience = n 번동안 갱신되지 않으면
-    restore_best_weights = True,  # 기본값 = false - 원칙적으론 true가 좋으나, false가 나을때도 있음.
+
+es = EarlyStopping(  # 최소 혹은 최대값을 구해주는 코드 (if문으로 구성되어있는 조건문)
+    monitor="val_loss",  # 모니터링 할게
+    mode="min",  # 최소점
+    patience=30,  # patience = n 번동안 갱신되지 않으면
+    restore_best_weights=True,  # 기본값 = false - 원칙적으론 true가 좋으나, false가 나을때도 있음.
 )
 
 
-start_time = time.time()     # 현재 시간을 반환. 시작시간
-hist = model.fit(x_train, y_train, 
-                 epochs=50000,
-                 batch_size=600, 
-                 validation_split=0.2,
-                 callbacks=[es],
-                 )
-end_time = time.time()       # 현재 시간을 반환. 종료시간
+start_time = time.time()  # 현재 시간을 반환. 시작시간
+hist = model.fit(
+    x_train,
+    y_train,
+    epochs=50000,
+    batch_size=600,
+    validation_split=0.2,
+    callbacks=[es],
+)
+end_time = time.time()  # 현재 시간을 반환. 종료시간
 
 print("===================keras28 california==========================")
 
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
 # 평가(보조)지표-R2
 y_predict = model.predict(x_test)
-from sklearn.metrics import r2_score
 
 r2 = r2_score(y_test, y_predict)
-print("r2 = : ", r2 )
+print("r2 = : ", r2)
 
 mse = mean_squared_error(y_test, y_predict)
-print('mse : ', mse)
+print("mse : ", mse)
 
-#RMSE함수의 정의
+
+# RMSE함수의 정의
 def RMSE(y_tset, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
+
 
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
 
-print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2), "sec")
 
 # print("============================ history =================================")
 # print(hist)
@@ -414,26 +416,31 @@ print("훈련시간 :", round(end_time - start_time, 2),"sec")
 # print(hist.history['val_loss'])
 # print("============================ history =================================")
 
-import matplotlib.pyplot as plt
 
 # print(plt.rcParams['font.family'])         # 그래프 출력시 ['sans-serif']폰트 가 디폴트이기 때문에 한글이 출력되지 않는다.
 
-plt.rcParams['font.family'] = 'Malgun Gothic'   # 그래서 맷플롯립 폰트를 한글을 지원하는 폰트로 삽입하여 그래프에 한글이 표시되도록 한다.
+plt.rcParams["font.family"] = (
+    "Malgun Gothic"  # 그래서 맷플롯립 폰트를 한글을 지원하는 폰트로 삽입하여 그래프에 한글이 표시되도록 한다.
+)
 
-plt.figure(figsize=(9,6))
-plt.plot(hist.history['loss'][1:], c='red', label='loss',)   #y값만 넣으면 시간순으로 그려줌.
-plt.plot(hist.history['val_loss'][1:], c='blue', label='val_loss')
-plt.legend(loc='upper right')    # 우측 상단에 라벨표시
-plt.title('캘리포니아 Loss')
-plt.xlabel('epochs')
+plt.figure(figsize=(9, 6))
+plt.plot(
+    hist.history["loss"][1:],
+    c="red",
+    label="loss",
+)  # y값만 넣으면 시간순으로 그려줌.
+plt.plot(hist.history["val_loss"][1:], c="blue", label="val_loss")
+plt.legend(loc="upper right")  # 우측 상단에 라벨표시
+plt.title("캘리포니아 Loss")
+plt.xlabel("epochs")
 
-plt.ylabel('loss')
+plt.ylabel("loss")
 
-plt.grid()    #격자 표시를 추가
-plt.show()    #
+plt.grid()  # 격자 표시를 추가
+plt.show()  #
 
 # exit()
-'''
+"""
 ########### submission.csv 만들기 // count 컬럼에 값 넣어주기 #################
 print(submission) #[715 rows x 1 columns]
 y_submit = model.predict(test_csv)
@@ -443,9 +450,9 @@ print(submission) # [715 rows x 1 columns]
 print(submission.shape)  # (715, 1)
 
 submission.to_csv(path + "submit/" + "submit_0907_1014.csv")
-'''
+"""
 
-'''
+"""
 ===============================================
 1차 시기
 random : 14
@@ -514,8 +521,4 @@ mse :  0.7861366521151975
 RMSE :  0.8866434752002619
 훈련시간 : 16.15 sec
 
-'''
-
-
-
-
+"""

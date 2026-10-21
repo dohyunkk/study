@@ -1,20 +1,22 @@
-'''
-2026-09-14 (월) 
+"""
+2026-09-14 (월)
 
-'''
+"""
+
+import datetime
+import time
 
 import numpy as np
 import pandas as pd
-import time
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.metrics import accuracy_score
-
 from sklearn.datasets import load_digits
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Sequential
 
-#1. 데이터
+# 1. 데이터
 datasets = load_digits()
 
 # print(datasets)
@@ -24,7 +26,7 @@ datasets = load_digits()
 # print(datasets.feature_names)
 
 x = datasets.data
-y = datasets['target']
+y = datasets["target"]
 
 # print(x.shape, y.shape)
 # (1797, 64) (1797,)
@@ -48,11 +50,12 @@ y = pd.get_dummies(y, dtype=int)
 # [1797 rows x 10 columns]
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    train_size = 0.8,
-    random_state = 52525,
-    stratify = y,
-    shuffle = True,
+    x,
+    y,
+    train_size=0.8,
+    random_state=52525,
+    stratify=y,
+    shuffle=True,
 )
 
 
@@ -61,7 +64,6 @@ x_train, x_test, y_train, y_test = train_test_split(
 # print(y_train.shape, y_test.shape)
 # (1257, 10) (540, 10)
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler,RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -78,86 +80,88 @@ print(x_train)
 print(x_test)
 
 print(np.min(x_train), np.max(x_train))
-# 
+#
 print(np.min(x_test), np.max(x_test))
-# 
+#
 
 # exit()
 
-#2. 모델
+# 2. 모델
 
 model = Sequential()
-model.add(Dense(640, input_shape = (64,), activation = 'relu'))
-model.add(Dense(320, activation = 'relu'))
-model.add(Dense(504, activation = 'relu'))
-model.add(Dense(700, activation = 'relu'))
-model.add(Dense(350, activation = 'relu'))
-model.add(Dense(130, activation = 'relu'))
-model.add(Dense(10, activation = 'softmax'))
+model.add(Dense(640, input_shape=(64,), activation="relu"))
+model.add(Dense(320, activation="relu"))
+model.add(Dense(504, activation="relu"))
+model.add(Dense(700, activation="relu"))
+model.add(Dense(350, activation="relu"))
+model.add(Dense(130, activation="relu"))
+model.add(Dense(10, activation="softmax"))
 
 
-#3. 컴파일, 훈련
+# 3. 컴파일, 훈련
 
-model.compile(loss='categorical_crossentropy',
-              optimizer = 'adam',
-              metrics=['acc'],
-              )
-
-es = EarlyStopping(
-    monitor = 'val_loss',
-    mode = 'auto',
-    patience = 50,
-    restore_best_weights = True,
+model.compile(
+    loss="categorical_crossentropy",
+    optimizer="adam",
+    metrics=["acc"],
 )
 
-#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
-import datetime
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="auto",
+    patience=50,
+    restore_best_weights=True,
+)
+
+# ★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 
 date = datetime.datetime.now()
-print(date)         # 2026-09-14 11:42:10.635267
-print(type(date))   # <class 'datetime.datetime'>        # ★ calss
+print(date)  # 2026-09-14 11:42:10.635267
+print(type(date))  # <class 'datetime.datetime'>        # ★ calss
 date = date.strftime("%m%d_%H%M")
-print(date)         # 2026-09-14 11:48:27.764409
-print(type(date))   # <class 'datetime.datetime'>
+print(date)  # 2026-09-14 11:48:27.764409
+print(type(date))  # <class 'datetime.datetime'>
 
-path = './_save/keras31/10_digits/'
-filename = '{epoch:04d}-{val_loss:.4f}.keras'
-filepath = "".join([path, 'k31_10_digits_', date, "-",filename])
+path = "./_save/keras31/10_digits/"
+filename = "{epoch:04d}-{val_loss:.4f}.keras"
+filepath = "".join([path, "k31_10_digits_", date, "-", filename])
 
 # 내가 생각하는 파일명 ex)
 # './_save/keras30/' + 'k30_' + '0914_1147' + '0530-0.001.keras'
 
-#★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
+# ★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
 
 # exit()
 
 mcp = ModelCheckpoint(
-    monitor = 'val_loss',
-    mode = 'auto',
-    save_best_only = True,
-    filepath = filepath,
-    verbose = 1,
+    monitor="val_loss",
+    mode="auto",
+    save_best_only=True,
+    filepath=filepath,
+    verbose=1,
 )
 
 start_time = time.time()
 
-model.fit(x_train, y_train,
-          epochs = 10000,
-          batch_size = 32,
-          verbose = 1,
-          validation_split = 0.3,
-          callbacks = [es, mcp],
-          )
+model.fit(
+    x_train,
+    y_train,
+    epochs=10000,
+    batch_size=32,
+    verbose=1,
+    validation_split=0.3,
+    callbacks=[es, mcp],
+)
 
 end_time = time.time()
 
-#.4 평가, 예측
+# .4 평가, 예측
 
 print("================ keras31_digits ========================")
 
 result = model.evaluate(x_test, y_test)
-print('loss : ', result[0])
-print('acc : ', round(result[1],2))
+print("loss : ", result[0])
+print("acc : ", round(result[1], 2))
 
 y_predict = model.predict(x_test)
 
@@ -178,10 +182,10 @@ y_test = np.argmax(y_test, axis=1)
 
 
 accuracy_score = accuracy_score(y_test, y_predict)
-print('acc_score : ', accuracy_score)
-print('걸린시간 : ', round(end_time - start_time, 2),'sec')
+print("acc_score : ", accuracy_score)
+print("걸린시간 : ", round(end_time - start_time, 2), "sec")
 
-'''
+"""
 ================ keras31_digits ========================
 12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - acc: 0.9694 - loss: 0.1328
 loss :  0.13275857269763947
@@ -191,4 +195,4 @@ acc_score :  0.9694444444444444
 걸린시간 :  13.76 sec
 
 
-'''
+"""

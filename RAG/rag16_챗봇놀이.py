@@ -1,23 +1,24 @@
-'''
+"""
 2026-10-07
 15 카피
 
 # rag15를 가지고 프롬프트 막 만져서 마음껏
-'''
+"""
 
 import os
 
-from langchain_community.document_loaders import TextLoader
-from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
-from langchain_chroma import Chroma
-from langchain_openai import ChatOpenAI
-
+import gradio as gr
 from dotenv import load_dotenv
+from langchain_chroma import Chroma
+from langchain_classic.chains import create_retrieval_chain
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
 load_dotenv()
 
-api_key = os.environ['MONOROUTER_API_KEY'].strip()
-base_url = 'https://monogpt.kr/api/monorouter/v1'
+api_key = os.environ["MONOROUTER_API_KEY"].strip()
+base_url = "https://monogpt.kr/api/monorouter/v1"
 
 
 # 1. 데이터
@@ -25,15 +26,15 @@ base_url = 'https://monogpt.kr/api/monorouter/v1'
 # 2. 데이터 자르기 (청킹)
 
 # 3. 임베딩
-from langchain_openai import OpenAIEmbeddings
+
 embeddings = OpenAIEmbeddings(
-    model = 'text-embedding-3-small',
+    model="text-embedding-3-small",
     api_key=api_key,
     base_url=base_url,
     # dimensions=5,
 )
 
-DB_PATH = './_db/Chroma12/'
+DB_PATH = "./_db/Chroma12/"
 
 # ========================================
 # 불러오기
@@ -41,7 +42,7 @@ DB_PATH = './_db/Chroma12/'
 vector_store = Chroma(
     embedding_function=embeddings,
     persist_directory=DB_PATH,
-    collection_name='chroma12',
+    collection_name="chroma12",
 )
 
 # print(f"벡터 저장소에 저장된 문서 수 : : {vector_store._collection.count()}",)
@@ -55,7 +56,7 @@ vector_store = Chroma(
 ########################### retrievers ############################
 ######################## 검색기(자료찾기) #########################
 
-retriever = vector_store.as_retriever(search_kwargs={"k":2})
+retriever = vector_store.as_retriever(search_kwargs={"k": 2})
 print(retriever)
 # tags=['Chroma', 'OpenAIEmbeddings']
 # vectorstore=<langchain_chroma.vectorstores.Chroma object at 0x000001D94EBD2090> search_kwargs={'k': 2}
@@ -67,11 +68,10 @@ print(retriever)
 
 print("=============================================================================")
 ######################## 모델 연결 #################################
-from langchain_openai import ChatOpenAI
 
 model = ChatOpenAI(
-    model = 'gpt-6-luna',
-    temperature=0,     # 응답의 무작위성을 낮춤
+    model="gpt-6-luna",
+    temperature=0,  # 응답의 무작위성을 낮춤
     max_tokens=1000,
     api_key=api_key,
     base_url=base_url,
@@ -94,9 +94,6 @@ print("=========================================================================
 # response = model.invoke(query_with_context)
 # print("model의 대답 :",response.content)
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-from langchain_classic.chains import create_retrieval_chain
 
 prompt = ChatPromptTemplate.from_template("""
 다음 컨텍스트를 바탕으로 질문에 답변해 주세요. 
@@ -109,7 +106,9 @@ prompt = ChatPromptTemplate.from_template("""
 """)
 
 # 체인 만들기
-docu_chain = create_stuff_documents_chain(model, prompt)   # prompt | model  = 검색된 문서들을 LLM에게 넣어서 답변을 만들게 하는 체인
+docu_chain = create_stuff_documents_chain(
+    model, prompt
+)  # prompt | model  = 검색된 문서들을 LLM에게 넣어서 답변을 만들게 하는 체인
 rag_chain = create_retrieval_chain(retriever, docu_chain)  # 검색 | docu_chain
 
 """
@@ -130,19 +129,15 @@ print(response['answer']) # 주어진 정보로는 답변할 수 없습니다.
 """
 # gradio 챗봇#################################
 # gradio 챗봇#################################
-import gradio as gr
+
 
 def answer_invoke(message, history):
-    response = rag_chain.invoke({"input" : message})
-    return response['answer']
+    response = rag_chain.invoke({"input": message})
+    return response["answer"]
+
 
 # gradio 인터페이스 만들자
-demo = gr.ChatInterface(fn=answer_invoke, title='응애!!')
+demo = gr.ChatInterface(fn=answer_invoke, title="응애!!")
 
 # gradio 실행
 demo.launch()
-
-
-
-
-

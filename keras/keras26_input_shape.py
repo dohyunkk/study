@@ -1,4 +1,4 @@
-'''
+"""
 2026-09-10 (목)
 keras_23_1 copy
 
@@ -11,21 +11,20 @@ keras_23_1 copy
 
 1. 순서는 바뀌지 않는다.
 2. 내용물은 바뀌지 않는다.
-'''
+"""
+
+import time
 
 import numpy as np
-import pandas as pd
-import time
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.callbacks import EarlyStopping
+from sklearn.datasets import load_iris
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Sequential
 
-from sklearn.datasets import load_iris       # 아이리스 데이터 셋 불러오기
-
-
-#1. 데이터
+# 1. 데이터
 datasets = load_iris()
 # print(datasets)
 # print(datasets.DESCR)
@@ -34,7 +33,7 @@ datasets = load_iris()
 
 
 x = datasets.data
-y = datasets['target']
+y = datasets["target"]
 
 # print(x.shape, y.shape)
 # (150, 4) (150,)
@@ -80,9 +79,9 @@ y = datasets['target']
 # exit()
 ######################## onehot3. sklearn ########################
 
-from sklearn.preprocessing import OneHotEncoder
+
 # y = y.reshape(150, 1) #  (150, 1)
-y = y.reshape(-1, 1)    # (150, 1)
+y = y.reshape(-1, 1)  # (150, 1)
 
 # print(y, y.shape)
 
@@ -90,18 +89,19 @@ y = y.reshape(-1, 1)    # (150, 1)
 
 # ohe = OneHotEncoder()   # sparse 형태로 나온다.
 ohe = OneHotEncoder(sparse_output=False)
-y = ohe.fit_transform(y)  # 
+y = ohe.fit_transform(y)  #
 # print(y)
 
 # exit()
 
 # train_test 분리
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
+    x,
+    y,
     train_size=0.8,
     random_state=9978,
-    stratify=y,                                # y_train과 y_predict의 값이 치우치지 않게 해줌.
-    shuffle=True,                              # y_train과 y_predict의 값이 치우치지 않게 해줌.
+    stratify=y,  # y_train과 y_predict의 값이 치우치지 않게 해줌.
+    shuffle=True,  # y_train과 y_predict의 값이 치우치지 않게 해줌.
 )
 
 # print(x_train.shape, x_test.shape)
@@ -112,19 +112,19 @@ x_train, x_test, y_train, y_test = train_test_split(
 
 # exit()
 
-#2. 모델구성
+# 2. 모델구성
 
 model = Sequential()
 # model.add(Dense(16, input_dim = 4, activation='relu'))
-model.add(Dense(16, input_shape =(4,), activation='relu'))
-model.add(Dense(32, activation = 'relu'))
-model.add(Dense(64, activation = 'relu'))
-model.add(Dense(32, activation = 'relu'))
-model.add(Dense(20, activation = 'relu'))
-model.add(Dense(10, activation = 'relu'))
-model.add(Dense(3, activation = 'softmax'))          #★ 다중분류는 activation = 'softmax'
+model.add(Dense(16, input_shape=(4,), activation="relu"))
+model.add(Dense(32, activation="relu"))
+model.add(Dense(64, activation="relu"))
+model.add(Dense(32, activation="relu"))
+model.add(Dense(20, activation="relu"))
+model.add(Dense(10, activation="relu"))
+model.add(Dense(3, activation="softmax"))  # ★ 다중분류는 activation = 'softmax'
 
-'''
+"""
             ★ input_shape ★
  원 데이터         ->     input_shape
 (n, 4)            ->     (4, )
@@ -133,40 +133,43 @@ model.add(Dense(3, activation = 'softmax'))          #★ 다중분류는 activa
 
 1. 순서는 바뀌지 않는다.
 2. 내용물은 바뀌지 않는다.
-'''
+"""
 
 
-#3. 컴파일, 훈련
+# 3. 컴파일, 훈련
 
-model.compile(loss='categorical_crossentropy',       #★ 다중분류는 loss='categorical_crossentropy'를 사용
-              optimizer='adam',
-              metrics=['acc'],
-              )
+model.compile(
+    loss="categorical_crossentropy",  # ★ 다중분류는 loss='categorical_crossentropy'를 사용
+    optimizer="adam",
+    metrics=["acc"],
+)
 
 es = EarlyStopping(
-    monitor = 'val_loss',
-    mode = 'auto',
-    patience = 20,
-    restore_best_weights = True,
+    monitor="val_loss",
+    mode="auto",
+    patience=20,
+    restore_best_weights=True,
 )
 
 start_time = time.time()
 
-hist = model.fit(x_train, y_train,
-                 epochs = 10000,
-                 batch_size = 8,
-                 verbose = 1,
-                 validation_split = 0.2,
-                 callbacks = [es],
-                 )
+hist = model.fit(
+    x_train,
+    y_train,
+    epochs=10000,
+    batch_size=8,
+    verbose=1,
+    validation_split=0.2,
+    callbacks=[es],
+)
 
 end_time = time.time()
 
 
 # 4. 평가, 예측
 result = model.evaluate(x_test, y_test)
-print('loss : ', result[0])
-print('acc : ', round(result[1],2))
+print("loss : ", result[0])
+print("acc : ", round(result[1], 2))
 
 y_predict = model.predict(x_test)
 
@@ -191,12 +194,11 @@ y_test = np.argmax(y_test, axis=1)
 # exit()
 
 accuracy_score = accuracy_score(y_test, y_predict)
-print('acc_score : ', accuracy_score)
-print('걸린시간 : ', round(end_time - start_time, 2),'sec')
+print("acc_score : ", accuracy_score)
+print("걸린시간 : ", round(end_time - start_time, 2), "sec")
 
-'''
+"""
 12/12 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - acc: 0.9479 - loss: 0.0919 - val_acc: 1.0000 - val_loss: 0.0336
 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 111ms/step - acc: 1.0000 - loss: 0.0299
 걸린시간 :  7.54 sec
-'''
-
+"""

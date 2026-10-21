@@ -32,32 +32,38 @@
 # ======================================================================================================================
 
 # [참고] 이 파일에서 쓰지 않는 import : time, Dropout, LSTM, to_categorical, EarlyStopping, accuracy_score, MinMaxScaler, StandardScaler, train_test_split (실행에는 영향 없음)
+
 import numpy as np
-import time
-
-from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.layers import Dense, Embedding, SimpleRNN
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, LSTM
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.text import Tokenizer
 
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.model_selection import train_test_split
-
-#1. 데이터
-docs = [                                   # 훈련용 문장 15개 (짧은 영화 리뷰) -> 문장 하나가 데이터 1개
-    '너무 재미있다', '참 최고에요', '참 잘 만든 영화에요',
-    '추천하고 싶은 영화입니다', '한 번 더 보고 싶어요', '글쎄',
-    '벌로에요', '생각보다 지루해요', '연기가 어색해요',
-    '재미없어요', '너무 재미없다.', '참 재밌네요',
-    '개똥이 바보', '말똥이 잘생겼다', '길동이 또 구라친다',
+# 1. 데이터
+docs = [  # 훈련용 문장 15개 (짧은 영화 리뷰) -> 문장 하나가 데이터 1개
+    "너무 재미있다",
+    "참 최고에요",
+    "참 잘 만든 영화에요",
+    "추천하고 싶은 영화입니다",
+    "한 번 더 보고 싶어요",
+    "글쎄",
+    "벌로에요",
+    "생각보다 지루해요",
+    "연기가 어색해요",
+    "재미없어요",
+    "너무 재미없다.",
+    "참 재밌네요",
+    "개똥이 바보",
+    "말똥이 잘생겼다",
+    "길동이 또 구라친다",
 ]
 
-labels = np.array([1,1,1,1,1,0,0,0,0,0,0,1,0,1,0])   # 1 = 긍정, 0 = 부정 (긍정 7개, 부정 8개)
+labels = np.array(
+    [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0]
+)  # 1 = 긍정, 0 = 부정 (긍정 7개, 부정 8개)
 
-token = Tokenizer()                        # 단어 사전을 만들고 문장을 번호로 바꿔 주는 도구 (인스턴스 생성)
-token.fit_on_texts(docs)                   # 15문장 전체로 단어 사전을 만듦 -> 단어 31개 (번호 1 ~ 31)
+token = Tokenizer()  # 단어 사전을 만들고 문장을 번호로 바꿔 주는 도구 (인스턴스 생성)
+token.fit_on_texts(docs)  # 15문장 전체로 단어 사전을 만듦 -> 단어 31개 (번호 1 ~ 31)
 # print(token.word_index)
 # {'참': 1, '너무': 2, '재미있다': 3, '최고에요': 4, '잘': 5,
 # '만든': 6, '영화에요': 7, '추천하고': 8, '싶은': 9, '영화입니다': 10,
@@ -66,26 +72,33 @@ token.fit_on_texts(docs)                   # 15문장 전체로 단어 사전을
 # '어색해요': 21, '재미없어요': 22, '재미없다': 23, '재밌네요': 24, '개똥이': 25,
 # '바보': 26, '말똥이': 27, '잘생겼다': 28, '길동이': 29, '또': 30, '구라친다': 31}
 
-x = token.texts_to_sequences(docs)         # 위에서 만든 단어 사전으로 문장을 단어 번호 리스트로 바꿈 (문장 15개 -> 리스트 15개)
-print(x)                                   # 문장마다 단어 수가 달라서 리스트 길이가 제각각 (1개 ~ 5개) -> 아래 padding 이 필요한 이유
+x = token.texts_to_sequences(
+    docs
+)  # 위에서 만든 단어 사전으로 문장을 단어 번호 리스트로 바꿈 (문장 15개 -> 리스트 15개)
+print(
+    x
+)  # 문장마다 단어 수가 달라서 리스트 길이가 제각각 (1개 ~ 5개) -> 아래 padding 이 필요한 이유
 # [[2, 3], [1, 4], [1, 5, 6, 7], [8, 9, 10], [11, 12, 13, 14, 15],[16], [17],
 # [18, 19], [20, 21], [22], [2, 23], [1, 24], [25, 26], [27, 28], [29, 30, 31]]
 
 #################### padding ####################
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-# 문장마다 단어 수가 다름 (1개 ~ 5개) -> 모델은 같은 길이만 받을 수 있어서 모자란 자리를 0 으로 채움
-padded_x = pad_sequences(x,                # padding 할 대상
-                         padding='post',   # post -> 뒤를 0으로 채움 / default 는 pre (앞을 0으로 채움)
-                         maxlen=5,         # 문장 길이를 5로 맞춤 -> 5보다 긴 문장은 잘림
-                         truncating='post' # 잘라낼 때 뒤쪽을 자름 / default 는 pre (앞쪽 잘림)
-                         )
 
-print(padded_x)                            # [[ 2  3  0  0  0] [ 1  4  0  0  0] ... -> 모자란 뒷자리가 0 으로 채워짐
-print(padded_x.shape)                      # (15, 5)
+# 문장마다 단어 수가 다름 (1개 ~ 5개) -> 모델은 같은 길이만 받을 수 있어서 모자란 자리를 0 으로 채움
+padded_x = pad_sequences(
+    x,  # padding 할 대상
+    padding="post",  # post -> 뒤를 0으로 채움 / default 는 pre (앞을 0으로 채움)
+    maxlen=5,  # 문장 길이를 5로 맞춤 -> 5보다 긴 문장은 잘림
+    truncating="post",  # 잘라낼 때 뒤쪽을 자름 / default 는 pre (앞쪽 잘림)
+)
+
+print(
+    padded_x
+)  # [[ 2  3  0  0  0] [ 1  4  0  0  0] ... -> 모자란 뒷자리가 0 으로 채워짐
+print(padded_x.shape)  # (15, 5)
 # Embedding 은 단어 번호 (정수) 를 그대로 받음 -> 01 ~ 03 과 달리 스케일링, reshape, One-Hot 을 하지 않음
 
-#2. 모델 구성
-from tensorflow.keras.layers import Dense, Embedding, SimpleRNN
+# 2. 모델 구성
+
 model = Sequential()
 
 #################### 임베딩1 ####################
@@ -93,9 +106,13 @@ model = Sequential()
 #   이보다 작으면 큰 번호의 단어가 사전 범위를 벗어남
 #   -> CPU 에서는 에러, GPU 에서는 에러 없이 0 벡터로 처리돼서 틀린 줄도 모르고 지나감
 model.add(Embedding(input_dim=32, output_dim=100, input_length=5))
-                    # 단어 사전 크기 (단어 종류 + 1), 출력 차원 (단어 하나를 몇 칸짜리 벡터로 만들지), 입력 시퀀스 길이 (padding 한 길이)
-model.add(SimpleRNN(10))                   # Embedding 출력 (None, 5, 100) 이 3차원이라 RNN 계열에 바로 넣을 수 있음 (reshape 필요 없음)
-model.add(Dense(1))                        # [참고] 이진 분류로 훈련하려면 activation='sigmoid' + binary_crossentropy 를 써야 함
+# 단어 사전 크기 (단어 종류 + 1), 출력 차원 (단어 하나를 몇 칸짜리 벡터로 만들지), 입력 시퀀스 길이 (padding 한 길이)
+model.add(
+    SimpleRNN(10)
+)  # Embedding 출력 (None, 5, 100) 이 3차원이라 RNN 계열에 바로 넣을 수 있음 (reshape 필요 없음)
+model.add(
+    Dense(1)
+)  # [참고] 이진 분류로 훈련하려면 activation='sigmoid' + binary_crossentropy 를 써야 함
 model.summary()
 
 ######################### Embedding 적용 후 (SimpleRNN 없이 Embedding -> Dense) #########################

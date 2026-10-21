@@ -1,51 +1,48 @@
-'''
+"""
 2026-09-14 (월)
 31_4에 30_2 접목
 
 https://dacon.io/competitions/open/235576/data
-'''
-
-
+"""
 
 import numpy as np
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Dense
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
 import pandas as pd
-import time
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.models import load_model
 
-#1. 데이터
+# 1. 데이터
 
-path = "c:/study/_data/ddarung/"       #절대경로 
+path = "c:/study/_data/ddarung/"  # 절대경로
 
 
 train_csv = pd.read_csv(path + "train.csv", index_col=0)
-# print(train_csv)   
+# print(train_csv)
 # id열 포함 [1459 rows x 11 columns]
 # id열 미포함 [1459 rows x 10 columns]
 
 test_csv = pd.read_csv(path + "test.csv", index_col=0)
-# print(test_csv) 
+# print(test_csv)
 # id열 미포함 [715 rows x 9 columns]
 
 submission = pd.read_csv(path + "submission.csv", index_col=0)
 # print(submission)
 # id열 미포함 [715 rows x 1 columns]
 
-# print(train_csv.shape) 
+# print(train_csv.shape)
 # (1459, 10)
-# print(test_csv.shape)  
+# print(test_csv.shape)
 # (715, 9)
 # print(submission.shape)
 # (715, 1)
 
 # print(train_csv.columns)
 
-#print(train_csv.info())
-   #   Column                  Non-Null Count  Dtype  
-# ---  ------                  --------------  -----  
-#  0   hour                    1459 non-null   int64  
+# print(train_csv.info())
+#   Column                  Non-Null Count  Dtype
+# ---  ------                  --------------  -----
+#  0   hour                    1459 non-null   int64
 #  1   hour_bef_temperature    1457 non-null   float64
 #  2   hour_bef_precipitation  1457 non-null   float64
 #  3   hour_bef_windspeed      1450 non-null   float64
@@ -55,30 +52,30 @@ submission = pd.read_csv(path + "submission.csv", index_col=0)
 #  7   hour_bef_pm10           1369 non-null   float64
 #  8   hour_bef_pm2.5          1342 non-null   float64
 #  9   count                   1459 non-null   float64
-#print(test_csv.info())
+# print(test_csv.info())
 
-# exit() 
+# exit()
 
 ######################### 결측치 처리 1. 삭제 #########################
 
 train_csv = train_csv.dropna()
-#print(train_csv) # [1328 rows x 10 columns]
+# print(train_csv) # [1328 rows x 10 columns]
 
 #################3###### train_csv를 x와 y로 분리######################
 
-x = train_csv.drop(['count'], axis=1) # 카운트라는 열(컬럼)을 삭제하겠다.
-#print(x) # [1328 rows x 9 columns]
+x = train_csv.drop(["count"], axis=1)  # 카운트라는 열(컬럼)을 삭제하겠다.
+# print(x) # [1328 rows x 9 columns]
 
-y = train_csv['count']
-#print(y)
-#print(y.shape) # (1328,)
+y = train_csv["count"]
+# print(y)
+# print(y.shape) # (1328,)
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y, 
+    x,
+    y,
     random_state=23,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -101,7 +98,7 @@ print(np.min(x_test), np.max(x_test))
 
 # exit()
 
-#2. 모델 구성
+# 2. 모델 구성
 # model = Sequential()
 # model.add(Dense(18, input_shape=(9,)))
 # model.add(Dense(9))
@@ -114,11 +111,11 @@ print(np.min(x_test), np.max(x_test))
 # model.compile(loss='mse', optimizer='adam')
 
 
-# es = EarlyStopping(               
-#     monitor = 'val_loss',         
-#     mode = 'min',                 
-#     patience = 15,                
-#     restore_best_weights = True,  
+# es = EarlyStopping(
+#     monitor = 'val_loss',
+#     mode = 'min',
+#     patience = 15,
+#     restore_best_weights = True,
 # )
 
 # #★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
@@ -148,38 +145,39 @@ print(np.min(x_test), np.max(x_test))
 #     verbose = 1,
 # )
 
-# start_time = time.time()     
-# hist = model.fit(x_train, y_train, 
+# start_time = time.time()
+# hist = model.fit(x_train, y_train,
 #                  epochs=50000,
-#                  batch_size=32, 
+#                  batch_size=32,
 #                  validation_split=0.2,
 #                  callbacks=[es, mcp],
 #                  )
-# end_time = time.time()       
-path = './_save/keras31/04_ddarung/'
+# end_time = time.time()
+path = "./_save/keras31/04_ddarung/"
 
-model = load_model(path + 'k31_04_ddarung_0914_1428-0044-2821.7031.keras')
+model = load_model(path + "k31_04_ddarung_0914_1428-0044-2821.7031.keras")
 
 
 print("===================== keras32_load_ddarung ================================")
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
 # 평가지표(r2)
 y_predict = model.predict(x_test)
-from sklearn.metrics import r2_score
 r2 = r2_score(y_test, y_predict)
 print("r2 = : ", r2)
 
 mse = mean_squared_error(y_test, y_predict)
 print("mse : ", mse)
 
-#RMSE함수의 정의
-def RMSE(y_test, y_predict):    
+
+# RMSE함수의 정의
+def RMSE(y_test, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
-    
+
+
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
 

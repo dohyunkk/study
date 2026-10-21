@@ -1,23 +1,25 @@
-'''
+"""
 2026-09-15 (화)
 keras30_1  카피
 
 cpu와 gpu의 작업 시간(속도)의 차이를 확인한다
-'''
+"""
+
+import time
 
 import numpy as np
-import pandas as pd
-import time
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Dense, Dropout
+from sklearn.datasets import load_diabetes
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
-from sklearn.datasets import fetch_california_housing, load_diabetes
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.models import Sequential
 
-path = './_save/keras31/'
+path = "./_save/keras31/"
 
 
-#1. 데이터
+# 1. 데이터
 datasets = load_diabetes()
 x = datasets.data
 y = datasets.target
@@ -25,11 +27,11 @@ y = datasets.target
 # print(x.shape, y.shape)  #(442, 10) (442,)
 
 x_train, x_test, y_train, y_test = train_test_split(
-    x, y, 
+    x,
+    y,
     random_state=95,
 )
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 # scaler = MinMaxScaler()
 # scaler = StandardScaler()
@@ -53,16 +55,15 @@ print(np.min(x_test), np.max(x_test))
 # exit()
 
 # 2. 모델 구성
-from tensorflow.keras.layers import Dropout
 
 model = Sequential()
-model.add(Dense(128, activation = 'relu', input_shape=(10,)))
+model.add(Dense(128, activation="relu", input_shape=(10,)))
 model.add(Dropout(0.3))
-model.add(Dense(512, activation = 'relu'))
+model.add(Dense(512, activation="relu"))
 model.add(Dropout(0.3))
-model.add(Dense(128, activation = 'relu'))
+model.add(Dense(128, activation="relu"))
 model.add(Dropout(0.3))
-model.add(Dense(32, activation = 'relu'))
+model.add(Dense(32, activation="relu"))
 model.add(Dense(1))
 
 # model.summary()
@@ -70,19 +71,18 @@ model.add(Dense(1))
 # exit()
 
 # 3. 컴파일, 훈련
-from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint # ★ ModelCheckpoint
 
-model.compile(loss='mse', optimizer='adam')
+model.compile(loss="mse", optimizer="adam")
 
-es = EarlyStopping(              
-    monitor = 'val_loss',        
-    mode = 'min',                 
-    patience = 30,                
-    restore_best_weights = True,
-    verbose = 1,
-    )
+es = EarlyStopping(
+    monitor="val_loss",
+    mode="min",
+    patience=30,
+    restore_best_weights=True,
+    verbose=1,
+)
 
-#★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
+# ★★★★★★★ mcp 세이브 파일명 만들기 시작 ★★★★★★★##
 # import datetime
 
 # date = datetime.datetime.now()
@@ -99,7 +99,7 @@ es = EarlyStopping(
 # 내가 생각하는 파일명 ex)
 # './_save/keras30/' + 'k30_' + '0914_1147' + '0530-0.001.keras'
 
-#★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
+# ★★★★★★★ mcp 세이브 파일명 만들기 끝 ★★★★★★★##
 
 # mcp = ModelCheckpoint(                              # ★ mcp = ModelCheckpoint()
 #     monitor = 'val_loss',
@@ -109,16 +109,18 @@ es = EarlyStopping(
 #     verbose = 1,
 # )
 
-start_time = time.time()    
+start_time = time.time()
 
-hist = model.fit(x_train, y_train, 
-                 epochs=30,
-                 batch_size=32, 
-                 validation_split=0.2,
-                #  callbacks=[es ],              # ★callbacks = [mcp],
-                 )
+hist = model.fit(
+    x_train,
+    y_train,
+    epochs=30,
+    batch_size=32,
+    validation_split=0.2,
+    #  callbacks=[es ],              # ★callbacks = [mcp],
+)
 
-end_time = time.time()      
+end_time = time.time()
 
 # model.save(path + 'keras29_3_save_model.keras')
 # model.save_weights(path + 'keras29_5_save_model_2.weights.h5')
@@ -127,33 +129,32 @@ end_time = time.time()
 # model.load_weights(path + 'keras29_5_save_model_1.weights.h5')
 
 
-
-
 print("===================keras35_diabetes==========================")
 
 
-#4. 평가, 예측
+# 4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
-print('loss : ', loss)
+print("loss : ", loss)
 
 # 평가(보조)지표-R2
 y_predict = model.predict(x_test)
-from sklearn.metrics import r2_score
 
 r2 = r2_score(y_test, y_predict)
-print("r2 = : ", r2 )
+print("r2 = : ", r2)
 
 mse = mean_squared_error(y_test, y_predict)
-print('mse : ', mse)
+print("mse : ", mse)
 
-#RMSE함수의 정의
+
+# RMSE함수의 정의
 def RMSE(y_tset, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
+
 
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
 
-print("훈련시간 :", round(end_time - start_time, 2),"sec")
+print("훈련시간 :", round(end_time - start_time, 2), "sec")
 
 # print("============================ history =================================")
 # print(hist)
@@ -180,11 +181,11 @@ print("훈련시간 :", round(end_time - start_time, 2),"sec")
 
 # plt.ylabel('loss')
 
-# plt.grid()    
-# plt.show()    
+# plt.grid()
+# plt.show()
 
 # exit()
-'''
+"""
 ########### submission.csv 만들기 // count 컬럼에 값 넣어주기 #################
 print(submission) #[715 rows x 1 columns]
 y_submit = model.predict(test_csv)
@@ -194,9 +195,9 @@ print(submission) # [715 rows x 1 columns]
 print(submission.shape)  # (715, 1)
 
 submission.to_csv(path + "submit/" + "submit_0907_1014.csv")
-'''
+"""
 
-'''
+"""
 --gpu-------------------------------------------
 Epoch 30/30
 9/9 [==============================] - 0s 4ms/step - loss: 2766.2183 - val_loss: 3779.1812
@@ -220,6 +221,4 @@ r2 = :  0.3723750202376752
 mse :  3915.2121377347576
 RMSE :  62.57165602519049
 훈련시간 : 2.96 sec
-'''
-
-
+"""
