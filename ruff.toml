@@ -4,6 +4,8 @@ indent-width = 4
 
 [lint]
 select = ["E4", "E7", "E9", "F", "I"]
+# 사용하지 않는 import(F401)는 저장할 때 자동으로 지우지 않음
+unfixable = ["F401"]
 
 [format]
 quote-style = "double"

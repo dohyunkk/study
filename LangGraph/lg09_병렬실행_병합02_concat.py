@@ -33,7 +33,7 @@ web_search = TavilySearch(
     max_results=5,
 )
 
-result = web_search.invoke({"query": "삼성전자 주가"})
+# result = web_search.invoke({"query": "삼성전자 주가"})
 
 # print(result)
 # print(result['results'][-1]['content'])
@@ -48,7 +48,7 @@ class State(TypedDict):  # typeddict를 상속받아서 마음대로 써도 된�
     messages: Annotated[list, add_messages]
     search_result: str
     analysis_result: str
-    final_result: str
+    # final_result: str
 
 
 # *################## 2. Node 정의 ####################
@@ -69,7 +69,7 @@ def analysis_agent(state: State):
     return {"analysis_result": response.content}
 
 
-def merge_agent(state: State):
+def merge_agent(state: State):  # ? 단순 concat
     result = (
         state["search_result"]
         + "\n\n"
