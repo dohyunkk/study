@@ -8,23 +8,23 @@ from xgboost import XGBRegressor
 # * 1. 데이터
 x, y = fetch_california_housing(return_X_y=True)
 
-# print(x, y)
-# print(x.shape, y.shape)
 
 n_split = 5
 kfold = KFold(n_splits=n_split, shuffle=True, random_state=333)
 
 # * 2. 모델
-# model = DecisionTreeRegressor()
-# model = RandomForestRegressor()
-# model = GradientBoostingRegressor()
-model = XGBRegressor()
+model1 = DecisionTreeRegressor()
+model2 = RandomForestRegressor()
+model3 = GradientBoostingRegressor()
+model4 = XGBRegressor()
 
+models = [model1, model2, model3, model4]
 
-# * 3, 4 훈련, 평가
-scores = cross_val_score(model, x, y, cv=kfold)
-
-print("r2 :", scores, "\n평균 r2 :", round(np.mean(scores), 2))
+for model in models:
+    # * 3, 4 훈련, 평가
+    scores = cross_val_score(model, x, y, cv=kfold)
+    print("==========", model.__class__.__name__, "=========")
+    print("r2 :", scores, "\n평균 r2 :", round(np.mean(scores), 2))
 
 """
 XGBRegressor
